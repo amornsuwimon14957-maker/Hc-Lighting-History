@@ -37,9 +37,7 @@
     <!-- STEP 1: เลือกอาคาร -->
     <section id="step-1" class="space-y-4">
       <h2 class="text-lg font-semibold text-slate-700">เลือกอาคารที่ต้องการดำเนินงาน</h2>
-      <div id="building-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- แสดงรายการอาคารจาก JS -->
-      </div>
+      <div id="building-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </section>
 
     <!-- STEP 2: เลือกห้อง และ No. หลอดไฟ -->
@@ -77,15 +75,26 @@
         <button onclick="goToStep(2)" class="text-sm text-indigo-600 hover:underline">← ย้อนกลับ</button>
       </div>
 
-      <form id="job-form" onsubmit="saveJob(event)" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+      <form id="job-form" onsubmit="saveJob(event)" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-5">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ปฏิบัติงาน / ช่าง</label>
           <input type="text" id="technician-name" required placeholder="ระบุชื่อผู้เปลี่ยน" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
 
+        <!-- Dynamic Items Section -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">รายการอุปกรณ์ที่เปลี่ยน</label>
-          <textarea id="items-detail" rows="3" required placeholder="เช่น หลอดไฟ TL5 จำนวน 1 หลอด, สตาร์ทเตอร์ 1 ตัว" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+          <div class="flex justify-between items-center mb-2">
+            <label class="block text-sm font-medium text-slate-700">รายการอุปกรณ์ที่เปลี่ยน</label>
+            <button type="button" onclick="addItemRow()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-semibold px-2.5 py-1 rounded border border-indigo-200 transition">
+              ➕ เพิ่มรายการ
+            </button>
+          </div>
+          
+          <datalist id="preset-items-list"></datalist>
+
+          <div id="items-container" class="space-y-2">
+            <!-- Item Rows Will Be Rendered Here -->
+          </div>
         </div>
 
         <div>
@@ -105,35 +114,45 @@
   <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
-        <h3 class="text-lg font-bold text-slate-800">⚙️ จัดการอาคาร ห้อง และ No. หลอดไฟ</h3>
+        <h3 class="text-lg font-bold text-slate-800">⚙️ จัดการข้อมูลระบบ</h3>
         <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
       
       <div class="p-6 overflow-y-auto space-y-6 flex-1">
+        <!-- เพิ่มอะไหล่ล่วงหน้า -->
+        <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 space-y-3">
+          <h4 class="font-bold text-indigo-900 text-sm">💡 จัดการรายการอะไหล่สะสม</h4>
+          <div class="flex gap-2">
+            <input type="text" id="new-preset-item-input" placeholder="ชื่ออุปกรณ์ เช่น หลอดไฟ LED 18W" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm">
+            <button onclick="addPresetItemFromAdmin()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่มอุปกรณ์</button>
+          </div>
+          <div id="preset-items-tags" class="flex flex-wrap gap-1.5 pt-2"></div>
+        </div>
+
         <!-- 1. เพิ่มอาคาร -->
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
-          <h4 class="font-bold text-slate-700 text-sm">➕ เพิ่มอาคารใหม่</h4>
+          <h4 class="font-bold text-slate-700 text-sm">🏢 เพิ่มอาคารใหม่</h4>
           <div class="flex gap-2">
             <input type="text" id="new-building-input" placeholder="ชื่ออาคาร เช่น อาคารคลังสินค้า" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm">
-            <button onclick="addBuilding()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่ม</button>
+            <button onclick="addBuilding()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่ม</button>
           </div>
         </div>
 
         <!-- 2. เพิ่มห้อง -->
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
-          <h4 class="font-bold text-slate-700 text-sm">➕ เพิ่มห้อง/พื้นที่</h4>
+          <h4 class="font-bold text-slate-700 text-sm">🚪 เพิ่มห้อง/พื้นที่</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
             <select id="admin-building-select" class="p-2 border border-slate-300 rounded-lg text-sm">
               <option value="">-- เลือกอาคาร --</option>
             </select>
             <input type="text" id="new-room-input" placeholder="ชื่อห้อง เช่น ห้องบัญชี" class="p-2 border border-slate-300 rounded-lg text-sm">
           </div>
-          <button onclick="addRoom()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium">เพิ่มห้อง</button>
+          <button onclick="addRoom()" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium">เพิ่มห้อง</button>
         </div>
 
         <!-- 3. เพิ่ม No. หลอดไฟ -->
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
-          <h4 class="font-bold text-slate-700 text-sm">➕ เพิ่ม No. หลอดไฟ</h4>
+          <h4 class="font-bold text-slate-700 text-sm">💡 เพิ่ม No. หลอดไฟ</h4>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <select id="admin-building-select-2" onchange="updateAdminRoomSelect()" class="p-2 border border-slate-300 rounded-lg text-sm">
               <option value="">-- เลือกอาคาร --</option>
@@ -143,15 +162,13 @@
             </select>
             <input type="text" id="new-light-input" placeholder="รหัสหลอด เช่น L-01" class="p-2 border border-slate-300 rounded-lg text-sm">
           </div>
-          <button onclick="addLightNo()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium">เพิ่ม No. หลอดไฟ</button>
+          <button onclick="addLightNo()" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium">เพิ่ม No. หลอดไฟ</button>
         </div>
 
         <!-- รายการโครงสร้างปัจจุบัน -->
         <div>
           <h4 class="font-bold text-slate-700 text-sm mb-2">📋 โครงสร้างข้อมูลปัจจุบัน</h4>
-          <div id="master-data-tree" class="space-y-2 text-sm max-h-48 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-white">
-            <!-- แสดงโครงสร้างข้อมูล -->
-          </div>
+          <div id="master-data-tree" class="space-y-2 text-sm max-h-48 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-white"></div>
         </div>
       </div>
 
@@ -180,7 +197,6 @@
   </div>
 
   <script>
-    // ข้อมูลเริ่มต้น (Master Data)
     const initialMasterData = {
       "อาคารสำนักงานใหญ่": {
         "ห้องประชุมใหญ่": ["L-01", "L-02", "L-03"],
@@ -192,19 +208,23 @@
       }
     };
 
+    const initialPresetItems = ["หลอดไฟ TL5", "สตาร์ทเตอร์", "บัลลาสต์อิเล็กทรอนิกส์", "หลอดไฟ LED T8 18W", "โคมไฟดาวน์ไลท์"];
+
     let masterData = {};
+    let presetItems = [];
     let state = { building: '', room: '', lightNo: '' };
 
-    // โหลดข้อมูล Master Data
-    function loadMasterData() {
-      const saved = localStorage.getItem('light_master_data');
-      if (saved) {
-        masterData = JSON.parse(saved);
-      } else {
-        masterData = JSON.parse(JSON.stringify(initialMasterData));
-        saveMasterData();
-      }
+    function loadInitialData() {
+      const savedMaster = localStorage.getItem('light_master_data');
+      masterData = savedMaster ? JSON.parse(savedMaster) : JSON.parse(JSON.stringify(initialMasterData));
+
+      const savedPresets = localStorage.getItem('light_preset_items');
+      presetItems = savedPresets ? JSON.parse(savedPresets) : [...initialPresetItems];
+
+      saveMasterData();
+      savePresetItems();
       renderBuildings();
+      updateDatalist();
     }
 
     function saveMasterData() {
@@ -212,11 +232,84 @@
       renderBuildings();
     }
 
-    // แสดงรายการอาคารใน Step 1
+    function savePresetItems() {
+      localStorage.setItem('light_preset_items', JSON.stringify(presetItems));
+      updateDatalist();
+      renderPresetTags();
+    }
+
+    function updateDatalist() {
+      const datalist = document.getElementById('preset-items-list');
+      datalist.innerHTML = presetItems.map(item => `<option value="${item}">`).join('');
+    }
+
+    function renderPresetTags() {
+      const container = document.getElementById('preset-items-tags');
+      if (!container) return;
+      container.innerHTML = presetItems.map((item, index) => `
+        <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+          ${item}
+          <button onclick="removePresetItem(${index})" class="text-indigo-500 hover:text-red-500 font-bold">&times;</button>
+        </span>
+      `).join('');
+    }
+
+    function addPresetItem(itemName) {
+      const trimmed = itemName.trim();
+      if (trimmed && !presetItems.includes(trimmed)) {
+        presetItems.push(trimmed);
+        savePresetItems();
+      }
+    }
+
+    function removePresetItem(index) {
+      presetItems.splice(index, 1);
+      savePresetItems();
+    }
+
+    function addPresetItemFromAdmin() {
+      const input = document.getElementById('new-preset-item-input');
+      if (input.value.trim()) {
+        addPresetItem(input.value);
+        input.value = '';
+      }
+    }
+
+    // Dynamic Item Rows
+    function addItemRow(name = '', qty = 1) {
+      const container = document.getElementById('items-container');
+      const rowId = 'item-row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+      
+      const div = document.createElement('div');
+      div.id = rowId;
+      div.className = 'flex gap-2 items-center';
+      div.innerHTML = `
+        <input type="text" list="preset-items-list" placeholder="เลือกหรือพิมพ์ชื่ออุปกรณ์" value="${name}" required class="item-name flex-1 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+        <input type="number" min="1" value="${qty}" required class="item-qty w-24 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm text-center" placeholder="จำนวน">
+        <span class="text-xs text-slate-500">ชิ้น</span>
+        <button type="button" onclick="removeItemRow('${rowId}')" class="text-slate-400 hover:text-red-500 p-2 font-bold text-lg">&times;</button>
+      `;
+      container.appendChild(div);
+    }
+
+    function removeItemRow(rowId) {
+      const container = document.getElementById('items-container');
+      if (container.children.length > 1) {
+        document.getElementById(rowId).remove();
+      } else {
+        alert('ต้องมีรายการอุปกรณ์อย่างน้อย 1 รายการ');
+      }
+    }
+
+    function resetItemRows() {
+      document.getElementById('items-container').innerHTML = '';
+      addItemRow();
+    }
+
+    // Navigation & UI
     function renderBuildings() {
       const listDiv = document.getElementById('building-list');
       listDiv.innerHTML = '';
-
       Object.keys(masterData).forEach(bName => {
         const btn = document.createElement('button');
         btn.className = 'p-6 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left group';
@@ -235,10 +328,8 @@
       document.getElementById('bc-building-name').innerText = buildingName;
       document.getElementById('bc-building').classList.remove('hidden');
 
-      // อัปเดต Dropdown ห้อง
       const roomSelect = document.getElementById('room-select');
       roomSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>';
-      
       if (masterData[buildingName]) {
         Object.keys(masterData[buildingName]).forEach(rName => {
           const opt = document.createElement('option');
@@ -247,7 +338,6 @@
           roomSelect.appendChild(opt);
         });
       }
-
       goToStep(2);
     }
 
@@ -278,6 +368,7 @@
 
         document.getElementById('bc-room-name').innerText = `${state.room} (${state.lightNo})`;
         document.getElementById('bc-room').classList.remove('hidden');
+        resetItemRows();
       } else if (stepNumber === 2) {
         document.getElementById('bc-room').classList.add('hidden');
       } else if (stepNumber === 1) {
@@ -292,6 +383,24 @@
 
     function saveJob(e) {
       e.preventDefault();
+
+      const itemRows = document.querySelectorAll('#items-container > div');
+      const itemsList = [];
+
+      itemRows.forEach(row => {
+        const name = row.querySelector('.item-name').value.trim();
+        const qty = parseInt(row.querySelector('.item-qty').value) || 1;
+        if (name) {
+          itemsList.push({ name, qty });
+          addPresetItem(name); // บันทึกชื่ออุปกรณ์เข้า Preset ให้อัตโนมัติ
+        }
+      });
+
+      if (itemsList.length === 0) {
+        alert('กรุณาระบุรายการอุปกรณ์อย่างน้อย 1 รายการ');
+        return;
+      }
+
       const record = {
         id: Date.now(),
         date: new Date().toLocaleString('th-TH'),
@@ -299,7 +408,7 @@
         room: state.room,
         lightNo: state.lightNo,
         technician: document.getElementById('technician-name').value,
-        items: document.getElementById('items-detail').value,
+        items: itemsList,
         note: document.getElementById('job-note').value
       };
 
@@ -312,13 +421,14 @@
       goToStep(1);
     }
 
-    // --- ระบบ Admin (จัดการข้อมูล) ---
+    // Admin & Structure Functions
     function toggleAdminModal() {
       const modal = document.getElementById('admin-modal');
       const isHidden = modal.classList.contains('hidden');
       if (isHidden) {
         populateAdminDropdowns();
         renderDataTree();
+        renderPresetTags();
         modal.classList.remove('hidden');
       } else {
         modal.classList.add('hidden');
@@ -328,7 +438,6 @@
     function populateAdminDropdowns() {
       const bSelect1 = document.getElementById('admin-building-select');
       const bSelect2 = document.getElementById('admin-building-select-2');
-      
       const options = '<option value="">-- เลือกอาคาร --</option>' + 
         Object.keys(masterData).map(b => `<option value="${b}">${b}</option>`).join('');
 
@@ -341,7 +450,6 @@
       const bName = document.getElementById('admin-building-select-2').value;
       const rSelect = document.getElementById('admin-room-select');
       rSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>';
-
       if (bName && masterData[bName]) {
         Object.keys(masterData[bName]).forEach(r => {
           rSelect.innerHTML += `<option value="${r}">${r}</option>`;
@@ -360,7 +468,6 @@
       input.value = '';
       populateAdminDropdowns();
       renderDataTree();
-      alert('เพิ่มอาคารเรียบร้อยแล้ว');
     }
 
     function addRoom() {
@@ -377,7 +484,6 @@
       input.value = '';
       populateAdminDropdowns();
       renderDataTree();
-      alert('เพิ่มห้องเรียบร้อยแล้ว');
     }
 
     function addLightNo() {
@@ -394,19 +500,13 @@
       saveMasterData();
       input.value = '';
       renderDataTree();
-      alert('เพิ่ม No. หลอดไฟเรียบร้อยแล้ว');
     }
 
     function deleteItem(bName, rName = null, lNo = null) {
       if (!confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) return;
-
-      if (lNo) {
-        masterData[bName][rName] = masterData[bName][rName].filter(item => item !== lNo);
-      } else if (rName) {
-        delete masterData[bName][rName];
-      } else {
-        delete masterData[bName];
-      }
+      if (lNo) masterData[bName][rName] = masterData[bName][rName].filter(item => item !== lNo);
+      else if (rName) delete masterData[bName][rName];
+      else delete masterData[bName];
 
       saveMasterData();
       populateAdminDropdowns();
@@ -416,7 +516,6 @@
     function renderDataTree() {
       const container = document.getElementById('master-data-tree');
       container.innerHTML = '';
-
       if (Object.keys(masterData).length === 0) {
         container.innerHTML = '<div class="text-slate-400">ยังไม่มีข้อมูล</div>';
         return;
@@ -446,21 +545,22 @@
             html += `</div>`;
           }
         });
-
         container.innerHTML += `<div class="mb-2">${html}</div>`;
       });
     }
 
     function resetMasterData() {
-      if (confirm('คุณต้องการคืนค่าข้อมูลอาคารและห้องเป็นค่าเริ่มต้นหรือไม่?')) {
+      if (confirm('คุณต้องการคืนค่าข้อมูลเป็นค่าเริ่มต้นหรือไม่?')) {
         masterData = JSON.parse(JSON.stringify(initialMasterData));
+        presetItems = [...initialPresetItems];
         saveMasterData();
+        savePresetItems();
         populateAdminDropdowns();
         renderDataTree();
       }
     }
 
-    // --- ประวัติ ---
+    // History Modal
     function toggleHistoryModal() {
       const modal = document.getElementById('history-modal');
       const isHidden = modal.classList.contains('hidden');
@@ -481,19 +581,28 @@
         return;
       }
 
-      historyList.innerHTML = history.map(item => `
-        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1 text-sm">
-          <div class="flex justify-between items-start text-indigo-600 font-semibold">
-            <span>${item.building} > ${item.room} [${item.lightNo}]</span>
-            <span class="text-xs text-slate-400 font-normal">${item.date}</span>
+      historyList.innerHTML = history.map(item => {
+        let itemsFormatted = '';
+        if (Array.isArray(item.items)) {
+          itemsFormatted = item.items.map(i => `${i.name} (${i.qty} ชิ้น)`).join(', ');
+        } else {
+          itemsFormatted = item.items;
+        }
+
+        return `
+          <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1 text-sm">
+            <div class="flex justify-between items-start text-indigo-600 font-semibold">
+              <span>${item.building} > ${item.room} [${item.lightNo}]</span>
+              <span class="text-xs text-slate-400 font-normal">${item.date}</span>
+            </div>
+            <div class="text-slate-800 font-medium">🔧 อุปกรณ์ที่เปลี่ยน: ${itemsFormatted}</div>
+            <div class="text-slate-500 text-xs flex justify-between">
+              <span>ผู้เปลี่ยน: ${item.technician}</span>
+              ${item.note ? `<span class="italic text-slate-400">หมายเหตุ: ${item.note}</span>` : ''}
+            </div>
           </div>
-          <div class="text-slate-800 font-medium">🔧 อุปกรณ์ที่เปลี่ยน: ${item.items}</div>
-          <div class="text-slate-500 text-xs flex justify-between">
-            <span>ผู้เปลี่ยน: ${item.technician}</span>
-            ${item.note ? `<span class="italic text-slate-400">หมายเหตุ: ${item.note}</span>` : ''}
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function clearHistory() {
@@ -503,8 +612,7 @@
       }
     }
 
-    // เริ่มต้นทำงาน
-    loadMasterData();
+    loadInitialData();
   </script>
 </body>
 </html>
