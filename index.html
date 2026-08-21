@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-10">
+
+  <!-- Header -->
+  <header class="bg-indigo-600 text-white shadow-md">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold flex items-center gap-2">
+        💡 ระบบบันทึกการเปลี่ยนหลอดไฟ
+      </h1>
+      <button onclick="toggleHistoryModal()" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm font-medium transition">
+        📜 ประวัติการเปลี่ยน
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 mt-6">
+    
+    <!-- Navigation Breadcrumb -->
+    <nav id="breadcrumb" class="text-sm font-medium text-slate-500 mb-4 flex items-center gap-2">
+      <span class="cursor-pointer hover:text-indigo-600" onclick="goToStep(1)">เลือกอาคาร</span>
+      <span id="bc-building" class="hidden">/ <span class="cursor-pointer hover:text-indigo-600" onclick="goToStep(2)" id="bc-building-name"></span></span>
+      <span id="bc-room" class="hidden">/ <span id="bc-room-name"></span></span>
+    </nav>
+
+    <!-- STEP 1: เลือกอาคาร -->
+    <section id="step-1" class="space-y-4">
+      <h2 class="text-lg font-semibold text-slate-700">เลือกอาคารที่ต้องการดำเนินงาน</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button onclick="selectBuilding('อาคารสำนักงานใหญ่')" class="p-6 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left group">
+          <div class="text-3xl mb-2">🏢</div>
+          <div class="font-bold text-lg text-slate-800 group-hover:text-indigo-600">อาคารสำนักงานใหญ่</div>
+          <div class="text-sm text-slate-500">ห้องทำงาน, ห้องประชุม, แผนกต่างๆ</div>
+        </button>
+        <button onclick="selectBuilding('อาคารเอนกประสงค์')" class="p-6 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left group">
+          <div class="text-3xl mb-2">🏬</div>
+          <div class="font-bold text-lg text-slate-800 group-hover:text-indigo-600">อาคารเอนกประสงค์</div>
+          <div class="text-sm text-slate-500">โรงอาหาร, ห้องจัดเลี้ยง, พื้นที่ส่วนกลาง</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 2: เลือกห้อง และ No. หลอดไฟ -->
+    <section id="step-2" class="hidden space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-semibold text-slate-700">เลือกห้องและจุดที่ต้องการแจ้งเปลี่ยน</h2>
+        <button onclick="goToStep(1)" class="text-sm text-indigo-600 hover:underline">← ย้อนกลับ</button>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">ห้อง / พื้นที่</label>
+          <select id="room-select" onchange="updateLightNumbers()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="">-- เลือกห้อง --</option>
+            <option value="ห้องประชุมใหญ่">ห้องประชุมใหญ่</option>
+            <option value="ห้องผู้บริหาร">ห้องผู้บริหาร</option>
+            <option value="โถงทางเดิน ชั้น 1">โถงทางเดิน ชั้น 1</option>
+            <option value="ห้องน้ำชาย/หญิง">ห้องน้ำชาย/หญิง</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">No. หลอดไฟ / ตำแหน่งโคม</label>
+          <select id="light-no-select" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="">-- เลือก No. หลอดไฟ --</option>
+          </select>
+        </div>
+
+        <button onclick="goToStep(3)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition">
+          ถัดไป: ระบุรายการที่เปลี่ยน →
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3: ฟอร์มระบุรายการเปลี่ยน + ปิดงาน -->
+    <section id="step-3" class="hidden space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-semibold text-slate-700">ระบุรายละเอียดการเปลี่ยนอะไหล่</h2>
+        <button onclick="goToStep(2)" class="text-sm text-indigo-600 hover:underline">← ย้อนกลับ</button>
+      </div>
+
+      <form id="job-form" onsubmit="saveJob(event)" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+        
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ปฏิบัติงาน / ช่าง</label>
+          <input type="text" id="technician-name" required placeholder="ระบุชื่อผู้เปลี่ยน" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">รายการอุปกรณ์ที่เปลี่ยน</label>
+          <textarea id="items-detail" rows="3" required placeholder="เช่น หลอดไฟ TL5 จำนวน 1 หลอด, สตาร์ทเตอร์ 1 ตัว" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+          <input type="text" id="job-note" placeholder="เช่น บัลลาสต์มีเสียงดัง, เปลี่ยนแทนของเดิมที่เสื่อมสภาพ" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-sm transition flex justify-center items-center gap-2">
+          ✅ บันทึกปิดงาน
+        </button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- Modal แสดงประวัติย้อนหลัง -->
+  <div id="history-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col">
+      <div class="p-4 border-b border-slate-200 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-800">📜 ประวัติการเปลี่ยนหลอดไฟ</h3>
+        <button onclick="toggleHistoryModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+      
+      <div class="p-4 overflow-y-auto space-y-3 flex-1" id="history-list">
+        <!-- รายการประวัติจะถูกแสดงที่นี่ด้วย JS -->
+      </div>
+
+      <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
+        <button onclick="clearHistory()" class="text-xs text-red-500 hover:underline">ล้างประวัติทั้งหมด</button>
+        <button onclick="toggleHistoryModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ข้อมูล State ของแอปพลิเคชัน
+    let state = {
+      building: '',
+      room: '',
+      lightNo: ''
+    };
+
+    // เลือกอาคาร
+    function selectBuilding(buildingName) {
+      state.building = buildingName;
+      document.getElementById('bc-building-name').innerText = buildingName;
+      document.getElementById('bc-building').classList.remove('hidden');
+      goToStep(2);
+    }
+
+    // อัปเดตรายการ No. หลอดไฟตามห้องที่เลือก
+    function updateLightNumbers() {
+      const roomSelect = document.getElementById('room-select');
+      const lightSelect = document.getElementById('light-no-select');
+      const selectedRoom = roomSelect.value;
+      
+      lightSelect.innerHTML = '<option value="">-- เลือก No. หลอดไฟ --</option>';
+
+      if (selectedRoom) {
+        // จำลอง No. หลอดไฟ 1-6 ประจำห้อง
+        for (let i = 1; i <= 6; i++) {
+          const opt = document.createElement('option');
+          opt.value = `L-${i}`;
+          opt.innerText = `โคมไฟ No. L-${i}`;
+          lightSelect.appendChild(opt);
+        }
+      }
+    }
+
+    // สลับหน้าจอขั้นตอน
+    function goToStep(stepNumber) {
+      if (stepNumber === 3) {
+        state.room = document.getElementById('room-select').value;
+        state.lightNo = document.getElementById('light-no-select').value;
+
+        if (!state.room || !state.lightNo) {
+          alert('กรุณาเลือกห้องและ No. หลอดไฟให้ครบถ้วน');
+          return;
+        }
+
+        document.getElementById('bc-room-name').innerText = `${state.room} (${state.lightNo})`;
+        document.getElementById('bc-room').classList.remove('hidden');
+      } else if (stepNumber === 2) {
+        document.getElementById('bc-room').classList.add('hidden');
+      } else if (stepNumber === 1) {
+        document.getElementById('bc-building').classList.add('hidden');
+        document.getElementById('bc-room').classList.add('hidden');
+      }
+
+      document.getElementById('step-1').classList.toggle('hidden', stepNumber !== 1);
+      document.getElementById('step-2').classList.toggle('hidden', stepNumber !== 2);
+      document.getElementById('step-3').classList.toggle('hidden', stepNumber !== 3);
+    }
+
+    // บันทึกข้อมูลปิดงาน
+    function saveJob(e) {
+      e.preventDefault();
+
+      const technician = document.getElementById('technician-name').value;
+      const items = document.getElementById('items-detail').value;
+      const note = document.getElementById('job-note').value;
+
+      const record = {
+        id: Date.now(),
+        date: new Date().toLocaleString('th-TH'),
+        building: state.building,
+        room: state.room,
+        lightNo: state.lightNo,
+        technician: technician,
+        items: items,
+        note: note
+      };
+
+      // ดึงประวัติเดิมและเพิ่มรายการใหม่
+      const history = JSON.parse(localStorage.getItem('light_change_history') || '[]');
+      history.unshift(record);
+      localStorage.setItem('light_change_history', JSON.stringify(history));
+
+      alert('บันทึกการเปลี่ยนหลอดไฟเรียบร้อยแล้ว!');
+
+      // รีเซ็ตฟอร์มและกลับไปหน้าแรก
+      document.getElementById('job-form').reset();
+      goToStep(1);
+    }
+
+    // เปิด/ปิด หน้าต่างประวัติ
+    function toggleHistoryModal() {
+      const modal = document.getElementById('history-modal');
+      const isHidden = modal.classList.contains('hidden');
+      
+      if (isHidden) {
+        renderHistory();
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    // แสดงรายการประวัติย้อนหลัง
+    function renderHistory() {
+      const historyList = document.getElementById('history-list');
+      const history = JSON.parse(localStorage.getItem('light_change_history') || '[]');
+
+      if (history.length === 0) {
+        historyList.innerHTML = '<div class="text-center text-slate-400 py-8">ยังไม่มีประวัติการบันทึก</div>';
+        return;
+      }
+
+      historyList.innerHTML = history.map(item => `
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1 text-sm">
+          <div class="flex justify-between items-start text-indigo-600 font-semibold">
+            <span>${item.building} > ${item.room} [${item.lightNo}]</span>
+            <span class="text-xs text-slate-400 font-normal">${item.date}</span>
+          </div>
+          <div class="text-slate-800 font-medium">🔧 อุปกรณ์ที่เปลี่ยน: ${item.items}</div>
+          <div class="text-slate-500 text-xs flex justify-between">
+            <span>ผู้เปลี่ยน: ${item.technician}</span>
+            ${item.note ? `<span class="italic text-slate-400">หมายเหตุ: ${item.note}</span>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ล้างประวัติทั้งหมด
+    function clearHistory() {
+      if (confirm('คุณต้องการล้างประวัติการบันทึกทั้งหมดหรือไม่?')) {
+        localStorage.removeItem('light_change_history');
+        renderHistory();
+      }
+    }
+  </script>
+</body>
+</html>
