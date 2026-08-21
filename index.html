@@ -11,12 +11,17 @@
   <!-- Header -->
   <header class="bg-indigo-600 text-white shadow-md">
     <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold flex items-center gap-2">
+      <h1 class="text-xl font-bold flex items-center gap-2 cursor-pointer" onclick="goToStep(1)">
         💡 ระบบบันทึกการเปลี่ยนหลอดไฟ
       </h1>
-      <button onclick="toggleHistoryModal()" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm font-medium transition">
-        📜 ประวัติการเปลี่ยน
-      </button>
+      <div class="flex gap-2">
+        <button onclick="toggleAdminModal()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1">
+          ⚙️ จัดการข้อมูล
+        </button>
+        <button onclick="toggleHistoryModal()" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1">
+          📜 ประวัติ
+        </button>
+      </div>
     </div>
   </header>
 
@@ -32,17 +37,8 @@
     <!-- STEP 1: เลือกอาคาร -->
     <section id="step-1" class="space-y-4">
       <h2 class="text-lg font-semibold text-slate-700">เลือกอาคารที่ต้องการดำเนินงาน</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <button onclick="selectBuilding('อาคารสำนักงานใหญ่')" class="p-6 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left group">
-          <div class="text-3xl mb-2">🏢</div>
-          <div class="font-bold text-lg text-slate-800 group-hover:text-indigo-600">อาคารสำนักงานใหญ่</div>
-          <div class="text-sm text-slate-500">ห้องทำงาน, ห้องประชุม, แผนกต่างๆ</div>
-        </button>
-        <button onclick="selectBuilding('อาคารเอนกประสงค์')" class="p-6 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left group">
-          <div class="text-3xl mb-2">🏬</div>
-          <div class="font-bold text-lg text-slate-800 group-hover:text-indigo-600">อาคารเอนกประสงค์</div>
-          <div class="text-sm text-slate-500">โรงอาหาร, ห้องจัดเลี้ยง, พื้นที่ส่วนกลาง</div>
-        </button>
+      <div id="building-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- แสดงรายการอาคารจาก JS -->
       </div>
     </section>
 
@@ -58,10 +54,6 @@
           <label class="block text-sm font-medium text-slate-700 mb-1">ห้อง / พื้นที่</label>
           <select id="room-select" onchange="updateLightNumbers()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="">-- เลือกห้อง --</option>
-            <option value="ห้องประชุมใหญ่">ห้องประชุมใหญ่</option>
-            <option value="ห้องผู้บริหาร">ห้องผู้บริหาร</option>
-            <option value="โถงทางเดิน ชั้น 1">โถงทางเดิน ชั้น 1</option>
-            <option value="ห้องน้ำชาย/หญิง">ห้องน้ำชาย/หญิง</option>
           </select>
         </div>
 
@@ -86,7 +78,6 @@
       </div>
 
       <form id="job-form" onsubmit="saveJob(event)" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
-        
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ปฏิบัติงาน / ช่าง</label>
           <input type="text" id="technician-name" required placeholder="ระบุชื่อผู้เปลี่ยน" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
@@ -110,7 +101,68 @@
 
   </main>
 
-  <!-- Modal แสดงประวัติย้อนหลัง -->
+  <!-- Modal 1: จัดการข้อมูล (Admin) -->
+  <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+      <div class="p-4 border-b border-slate-200 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-800">⚙️ จัดการอาคาร ห้อง และ No. หลอดไฟ</h3>
+        <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+      
+      <div class="p-6 overflow-y-auto space-y-6 flex-1">
+        <!-- 1. เพิ่มอาคาร -->
+        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+          <h4 class="font-bold text-slate-700 text-sm">➕ เพิ่มอาคารใหม่</h4>
+          <div class="flex gap-2">
+            <input type="text" id="new-building-input" placeholder="ชื่ออาคาร เช่น อาคารคลังสินค้า" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm">
+            <button onclick="addBuilding()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่ม</button>
+          </div>
+        </div>
+
+        <!-- 2. เพิ่มห้อง -->
+        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+          <h4 class="font-bold text-slate-700 text-sm">➕ เพิ่มห้อง/พื้นที่</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <select id="admin-building-select" class="p-2 border border-slate-300 rounded-lg text-sm">
+              <option value="">-- เลือกอาคาร --</option>
+            </select>
+            <input type="text" id="new-room-input" placeholder="ชื่อห้อง เช่น ห้องบัญชี" class="p-2 border border-slate-300 rounded-lg text-sm">
+          </div>
+          <button onclick="addRoom()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium">เพิ่มห้อง</button>
+        </div>
+
+        <!-- 3. เพิ่ม No. หลอดไฟ -->
+        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+          <h4 class="font-bold text-slate-700 text-sm">➕ เพิ่ม No. หลอดไฟ</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <select id="admin-building-select-2" onchange="updateAdminRoomSelect()" class="p-2 border border-slate-300 rounded-lg text-sm">
+              <option value="">-- เลือกอาคาร --</option>
+            </select>
+            <select id="admin-room-select" class="p-2 border border-slate-300 rounded-lg text-sm">
+              <option value="">-- เลือกห้อง --</option>
+            </select>
+            <input type="text" id="new-light-input" placeholder="รหัสหลอด เช่น L-01" class="p-2 border border-slate-300 rounded-lg text-sm">
+          </div>
+          <button onclick="addLightNo()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium">เพิ่ม No. หลอดไฟ</button>
+        </div>
+
+        <!-- รายการโครงสร้างปัจจุบัน -->
+        <div>
+          <h4 class="font-bold text-slate-700 text-sm mb-2">📋 โครงสร้างข้อมูลปัจจุบัน</h4>
+          <div id="master-data-tree" class="space-y-2 text-sm max-h-48 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-white">
+            <!-- แสดงโครงสร้างข้อมูล -->
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
+        <button onclick="resetMasterData()" class="text-xs text-red-500 hover:underline">คืนค่าข้อมูลเริ่มต้น</button>
+        <button onclick="toggleAdminModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: แสดงประวัติย้อนหลัง -->
   <div id="history-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
@@ -118,9 +170,7 @@
         <button onclick="toggleHistoryModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
       
-      <div class="p-4 overflow-y-auto space-y-3 flex-1" id="history-list">
-        <!-- รายการประวัติจะถูกแสดงที่นี่ด้วย JS -->
-      </div>
+      <div class="p-4 overflow-y-auto space-y-3 flex-1" id="history-list"></div>
 
       <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
         <button onclick="clearHistory()" class="text-xs text-red-500 hover:underline">ล้างประวัติทั้งหมด</button>
@@ -130,41 +180,92 @@
   </div>
 
   <script>
-    // ข้อมูล State ของแอปพลิเคชัน
-    let state = {
-      building: '',
-      room: '',
-      lightNo: ''
+    // ข้อมูลเริ่มต้น (Master Data)
+    const initialMasterData = {
+      "อาคารสำนักงานใหญ่": {
+        "ห้องประชุมใหญ่": ["L-01", "L-02", "L-03"],
+        "ห้องผู้บริหาร": ["L-01", "L-02"]
+      },
+      "อาคารเอนกประสงค์": {
+        "โรงอาหาร": ["L-01", "L-02", "L-03", "L-04"],
+        "โถงกิจกรรม": ["L-01", "L-02"]
+      }
     };
 
-    // เลือกอาคาร
+    let masterData = {};
+    let state = { building: '', room: '', lightNo: '' };
+
+    // โหลดข้อมูล Master Data
+    function loadMasterData() {
+      const saved = localStorage.getItem('light_master_data');
+      if (saved) {
+        masterData = JSON.parse(saved);
+      } else {
+        masterData = JSON.parse(JSON.stringify(initialMasterData));
+        saveMasterData();
+      }
+      renderBuildings();
+    }
+
+    function saveMasterData() {
+      localStorage.setItem('light_master_data', JSON.stringify(masterData));
+      renderBuildings();
+    }
+
+    // แสดงรายการอาคารใน Step 1
+    function renderBuildings() {
+      const listDiv = document.getElementById('building-list');
+      listDiv.innerHTML = '';
+
+      Object.keys(masterData).forEach(bName => {
+        const btn = document.createElement('button');
+        btn.className = 'p-6 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left group';
+        btn.onclick = () => selectBuilding(bName);
+        btn.innerHTML = `
+          <div class="text-3xl mb-2">🏢</div>
+          <div class="font-bold text-lg text-slate-800 group-hover:text-indigo-600">${bName}</div>
+          <div class="text-sm text-slate-500">จำนวน ${Object.keys(masterData[bName]).length} ห้อง</div>
+        `;
+        listDiv.appendChild(btn);
+      });
+    }
+
     function selectBuilding(buildingName) {
       state.building = buildingName;
       document.getElementById('bc-building-name').innerText = buildingName;
       document.getElementById('bc-building').classList.remove('hidden');
+
+      // อัปเดต Dropdown ห้อง
+      const roomSelect = document.getElementById('room-select');
+      roomSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>';
+      
+      if (masterData[buildingName]) {
+        Object.keys(masterData[buildingName]).forEach(rName => {
+          const opt = document.createElement('option');
+          opt.value = rName;
+          opt.innerText = rName;
+          roomSelect.appendChild(opt);
+        });
+      }
+
       goToStep(2);
     }
 
-    // อัปเดตรายการ No. หลอดไฟตามห้องที่เลือก
     function updateLightNumbers() {
-      const roomSelect = document.getElementById('room-select');
+      const selectedRoom = document.getElementById('room-select').value;
       const lightSelect = document.getElementById('light-no-select');
-      const selectedRoom = roomSelect.value;
-      
       lightSelect.innerHTML = '<option value="">-- เลือก No. หลอดไฟ --</option>';
 
-      if (selectedRoom) {
-        // จำลอง No. หลอดไฟ 1-6 ประจำห้อง
-        for (let i = 1; i <= 6; i++) {
+      if (selectedRoom && masterData[state.building] && masterData[state.building][selectedRoom]) {
+        masterData[state.building][selectedRoom].forEach(lNo => {
           const opt = document.createElement('option');
-          opt.value = `L-${i}`;
-          opt.innerText = `โคมไฟ No. L-${i}`;
+          opt.value = lNo;
+          opt.innerText = `โคมไฟ No. ${lNo}`;
           lightSelect.appendChild(opt);
-        }
+        });
       }
     }
 
-    // สลับหน้าจอขั้นตอน
     function goToStep(stepNumber) {
       if (stepNumber === 3) {
         state.room = document.getElementById('room-select').value;
@@ -189,42 +290,180 @@
       document.getElementById('step-3').classList.toggle('hidden', stepNumber !== 3);
     }
 
-    // บันทึกข้อมูลปิดงาน
     function saveJob(e) {
       e.preventDefault();
-
-      const technician = document.getElementById('technician-name').value;
-      const items = document.getElementById('items-detail').value;
-      const note = document.getElementById('job-note').value;
-
       const record = {
         id: Date.now(),
         date: new Date().toLocaleString('th-TH'),
         building: state.building,
         room: state.room,
         lightNo: state.lightNo,
-        technician: technician,
-        items: items,
-        note: note
+        technician: document.getElementById('technician-name').value,
+        items: document.getElementById('items-detail').value,
+        note: document.getElementById('job-note').value
       };
 
-      // ดึงประวัติเดิมและเพิ่มรายการใหม่
       const history = JSON.parse(localStorage.getItem('light_change_history') || '[]');
       history.unshift(record);
       localStorage.setItem('light_change_history', JSON.stringify(history));
 
       alert('บันทึกการเปลี่ยนหลอดไฟเรียบร้อยแล้ว!');
-
-      // รีเซ็ตฟอร์มและกลับไปหน้าแรก
       document.getElementById('job-form').reset();
       goToStep(1);
     }
 
-    // เปิด/ปิด หน้าต่างประวัติ
+    // --- ระบบ Admin (จัดการข้อมูล) ---
+    function toggleAdminModal() {
+      const modal = document.getElementById('admin-modal');
+      const isHidden = modal.classList.contains('hidden');
+      if (isHidden) {
+        populateAdminDropdowns();
+        renderDataTree();
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function populateAdminDropdowns() {
+      const bSelect1 = document.getElementById('admin-building-select');
+      const bSelect2 = document.getElementById('admin-building-select-2');
+      
+      const options = '<option value="">-- เลือกอาคาร --</option>' + 
+        Object.keys(masterData).map(b => `<option value="${b}">${b}</option>`).join('');
+
+      bSelect1.innerHTML = options;
+      bSelect2.innerHTML = options;
+      document.getElementById('admin-room-select').innerHTML = '<option value="">-- เลือกห้อง --</option>';
+    }
+
+    function updateAdminRoomSelect() {
+      const bName = document.getElementById('admin-building-select-2').value;
+      const rSelect = document.getElementById('admin-room-select');
+      rSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>';
+
+      if (bName && masterData[bName]) {
+        Object.keys(masterData[bName]).forEach(r => {
+          rSelect.innerHTML += `<option value="${r}">${r}</option>`;
+        });
+      }
+    }
+
+    function addBuilding() {
+      const input = document.getElementById('new-building-input');
+      const val = input.value.trim();
+      if (!val) return alert('กรุณาระบุชื่ออาคาร');
+      if (masterData[val]) return alert('มีอาคารนี้อยู่แล้ว');
+
+      masterData[val] = {};
+      saveMasterData();
+      input.value = '';
+      populateAdminDropdowns();
+      renderDataTree();
+      alert('เพิ่มอาคารเรียบร้อยแล้ว');
+    }
+
+    function addRoom() {
+      const bName = document.getElementById('admin-building-select').value;
+      const input = document.getElementById('new-room-input');
+      const rName = input.value.trim();
+
+      if (!bName) return alert('กรุณาเลือกอาคาร');
+      if (!rName) return alert('กรุณาระบุชื่อห้อง');
+      if (masterData[bName][rName]) return alert('มีห้องนี้อยู่แล้วในอาคาร');
+
+      masterData[bName][rName] = [];
+      saveMasterData();
+      input.value = '';
+      populateAdminDropdowns();
+      renderDataTree();
+      alert('เพิ่มห้องเรียบร้อยแล้ว');
+    }
+
+    function addLightNo() {
+      const bName = document.getElementById('admin-building-select-2').value;
+      const rName = document.getElementById('admin-room-select').value;
+      const input = document.getElementById('new-light-input');
+      const lNo = input.value.trim();
+
+      if (!bName || !rName) return alert('กรุณาเลือกอาคารและห้อง');
+      if (!lNo) return alert('กรุณาระบุ No. หลอดไฟ');
+      if (masterData[bName][rName].includes(lNo)) return alert('มี No. หลอดไฟนี้อยู่แล้ว');
+
+      masterData[bName][rName].push(lNo);
+      saveMasterData();
+      input.value = '';
+      renderDataTree();
+      alert('เพิ่ม No. หลอดไฟเรียบร้อยแล้ว');
+    }
+
+    function deleteItem(bName, rName = null, lNo = null) {
+      if (!confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) return;
+
+      if (lNo) {
+        masterData[bName][rName] = masterData[bName][rName].filter(item => item !== lNo);
+      } else if (rName) {
+        delete masterData[bName][rName];
+      } else {
+        delete masterData[bName];
+      }
+
+      saveMasterData();
+      populateAdminDropdowns();
+      renderDataTree();
+    }
+
+    function renderDataTree() {
+      const container = document.getElementById('master-data-tree');
+      container.innerHTML = '';
+
+      if (Object.keys(masterData).length === 0) {
+        container.innerHTML = '<div class="text-slate-400">ยังไม่มีข้อมูล</div>';
+        return;
+      }
+
+      Object.keys(masterData).forEach(b => {
+        let html = `<div class="font-bold text-slate-800 flex justify-between items-center bg-slate-100 p-1 rounded">
+          <span>🏢 ${b}</span>
+          <button onclick="deleteItem('${b}')" class="text-red-500 text-xs px-1 hover:underline">ลบอาคาร</button>
+        </div>`;
+
+        Object.keys(masterData[b]).forEach(r => {
+          html += `<div class="ml-4 text-slate-700 flex justify-between items-center my-1">
+            <span>🚪 ${r}</span>
+            <button onclick="deleteItem('${b}', '${r}')" class="text-red-500 text-xs px-1 hover:underline">ลบห้อง</button>
+          </div>`;
+
+          const lights = masterData[b][r];
+          if (lights.length > 0) {
+            html += `<div class="ml-8 text-slate-500 text-xs flex flex-wrap gap-1 mb-1">`;
+            lights.forEach(l => {
+              html += `<span class="bg-slate-200 px-1.5 py-0.5 rounded flex items-center gap-1">
+                💡 ${l}
+                <button onclick="deleteItem('${b}', '${r}', '${l}')" class="text-red-500 font-bold hover:text-red-700">&times;</button>
+              </span>`;
+            });
+            html += `</div>`;
+          }
+        });
+
+        container.innerHTML += `<div class="mb-2">${html}</div>`;
+      });
+    }
+
+    function resetMasterData() {
+      if (confirm('คุณต้องการคืนค่าข้อมูลอาคารและห้องเป็นค่าเริ่มต้นหรือไม่?')) {
+        masterData = JSON.parse(JSON.stringify(initialMasterData));
+        saveMasterData();
+        populateAdminDropdowns();
+        renderDataTree();
+      }
+    }
+
+    // --- ประวัติ ---
     function toggleHistoryModal() {
       const modal = document.getElementById('history-modal');
       const isHidden = modal.classList.contains('hidden');
-      
       if (isHidden) {
         renderHistory();
         modal.classList.remove('hidden');
@@ -233,7 +472,6 @@
       }
     }
 
-    // แสดงรายการประวัติย้อนหลัง
     function renderHistory() {
       const historyList = document.getElementById('history-list');
       const history = JSON.parse(localStorage.getItem('light_change_history') || '[]');
@@ -258,13 +496,15 @@
       `).join('');
     }
 
-    // ล้างประวัติทั้งหมด
     function clearHistory() {
       if (confirm('คุณต้องการล้างประวัติการบันทึกทั้งหมดหรือไม่?')) {
         localStorage.removeItem('light_change_history');
         renderHistory();
       }
     }
+
+    // เริ่มต้นทำงาน
+    loadMasterData();
   </script>
 </body>
 </html>
