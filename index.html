@@ -4,21 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ</title>
+
+  <!-- Open Graph Meta Tags สำหรับโชว์โลโก้และข้อมูลเวลาแชร์ลิงก์ใน LINE / Facebook -->
+  <meta property="og:title" content="ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ">
+  <meta property="og:description" content="ระบบจัดการ และบันทึกประวัติการเปลี่ยนหลอดไฟประจำอาคาร">
+  <meta property="og:image" content="https://i.postimg.cc/7h8bHMVr/image-removebg-preview-(1).png">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon / ไอคอนแท็บเบราว์เซอร์ -->
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/7h8bHMVr/image-removebg-preview-(1).png">
+
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-10">
 
   <!-- Header -->
   <header class="bg-indigo-600 text-white shadow-md">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold flex items-center gap-2 cursor-pointer" onclick="goToStep(1)">
-        💡 ระบบบันทึกการเปลี่ยนหลอดไฟ
-      </h1>
+    <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+      <!-- Logo + Title -->
+      <div class="flex items-center gap-3 cursor-pointer group" onclick="goToStep(1)">
+        <img 
+          src="https://i.postimg.cc/7h8bHMVr/image-removebg-preview-(1).png" 
+          alt="Logo" 
+          class="w-10 h-10 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-200"
+        >
+        <div>
+          <h1 class="text-xl font-bold leading-tight group-hover:text-indigo-100 transition-colors">
+            ระบบบันทึกการเปลี่ยนหลอดไฟ
+          </h1>
+          <p class="text-[10px] text-indigo-200 tracking-wide font-normal">LIGHTING MAINTENANCE SYSTEM</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
       <div class="flex gap-2">
-        <button onclick="toggleAdminModal()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1">
+        <button onclick="toggleAdminModal()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow-sm">
           ⚙️ จัดการข้อมูล
         </button>
-        <button onclick="toggleHistoryModal()" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1">
+        <button onclick="toggleHistoryModal()" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow-sm">
           📜 ประวัติ
         </button>
       </div>
@@ -241,7 +264,7 @@
   </div>
 
   <script>
-    // รายการอาคารทั้ง 12 อาคาร (พร้อมตัวเลขกำกับหน้าชื่อ)
+    // รายการอาคารทั้ง 12 อาคาร
     const initialMasterData = {
       "1. อาคารสำนักงานใหญ่": {
         "ห้องประชุมใหญ่": ["L-01", "L-02", "L-03"],
