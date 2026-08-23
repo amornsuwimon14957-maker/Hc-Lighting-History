@@ -35,9 +35,29 @@
     </nav>
 
     <!-- STEP 1: เลือกอาคาร -->
-    <section id="step-1" class="space-y-4">
-      <h2 class="text-lg font-semibold text-slate-700">เลือกอาคารที่ต้องการดำเนินงาน</h2>
-      <div id="building-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    <section id="step-1" class="space-y-6">
+      
+      <!-- แผนผังภายในบริษัท -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <h3 class="text-md font-semibold text-slate-700 mb-3 flex items-center gap-2">
+          🗺️ แผนผังภายในบริษัท (Company Layout)
+        </h3>
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 flex justify-center items-center">
+          <img 
+            src="https://i.postimg.cc/yd0pN6P8/1-(1).png" 
+            alt="แผนผังภายในบริษัท" 
+            class="w-full max-h-[450px] object-contain hover:scale-105 transition-transform duration-300 cursor-pointer"
+            onclick="window.open(this.src, '_blank')"
+            title="คลิกเพื่อดูรูปภาพขนาดใหญ่"
+          />
+        </div>
+        <p class="text-xs text-slate-400 text-center mt-2">* คลิกที่รูปเพื่อเปิดดูแผนผังขยายใหญ่</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold text-slate-700 mb-3">เลือกอาคารที่ต้องการดำเนินงาน</h2>
+        <div id="building-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+      </div>
     </section>
 
     <!-- STEP 2: เลือกห้อง และ No. หลอดไฟ -->
@@ -131,7 +151,7 @@
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
           <h4 class="font-bold text-slate-700 text-sm">🏢 เพิ่มอาคารใหม่</h4>
           <div class="flex gap-2">
-            <input type="text" id="new-building-input" placeholder="ชื่ออาคาร เช่น อาคารคลังสินค้า" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm">
+            <input type="text" id="new-building-input" placeholder="ชื่ออาคาร เช่น อาคารใหม่" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm">
             <button onclick="addBuilding()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่ม</button>
           </div>
         </div>
@@ -143,7 +163,7 @@
             <select id="admin-building-select" class="p-2 border border-slate-300 rounded-lg text-sm">
               <option value="">-- เลือกอาคาร --</option>
             </select>
-            <input type="text" id="new-room-input" placeholder="ชื่อห้อง เช่น ห้องบัญชี" class="p-2 border border-slate-300 rounded-lg text-sm">
+            <input type="text" id="new-room-input" placeholder="ชื่อห้อง เช่น ห้องทำงาน" class="p-2 border border-slate-300 rounded-lg text-sm">
           </div>
           <button onclick="addRoom()" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium">เพิ่มห้อง</button>
         </div>
@@ -171,7 +191,7 @@
       </div>
 
       <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
-        <button onclick="resetMasterData()" class="text-xs text-red-500 hover:underline">คืนค่าข้อมูลเริ่มต้น</button>
+        <button onclick="resetMasterData()" class="text-xs text-red-500 hover:underline">รีเซ็ตข้อมูลเป็น 12 อาคารเริ่มต้น</button>
         <button onclick="toggleAdminModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium">ปิด</button>
       </div>
     </div>
@@ -221,14 +241,46 @@
   </div>
 
   <script>
+    // รายการอาคารทั้ง 12 อาคาร
     const initialMasterData = {
       "อาคารสำนักงานใหญ่": {
         "ห้องประชุมใหญ่": ["L-01", "L-02", "L-03"],
         "ห้องผู้บริหาร": ["L-01", "L-02"]
       },
       "อาคารเอนกประสงค์": {
-        "โรงอาหาร": ["L-01", "L-02", "L-03", "L-04"],
+        "โรงอาหาร": ["L-01", "L-02", "L-03"],
         "โถงกิจกรรม": ["L-01", "L-02"]
+      },
+      "อาคารฝ่ายสนับสนุนและบริการ": {
+        "ห้องทำงาน": ["L-01", "L-02"]
+      },
+      "อาคาร IT": {
+        "ห้อง Server": ["L-01", "L-02"],
+        "ห้องทำงาน IT": ["L-01", "L-02"]
+      },
+      "อาคารโครงสร้างเหล็ก": {
+        "พื้นที่การผลิต": ["L-01", "L-02", "L-03"]
+      },
+      "อาคาร QC และ Survey": {
+        "ห้องปฏิบัติการ QC": ["L-01", "L-02"]
+      },
+      "อาคาร D1": {
+        "พื้นที่ส่วนกลาง": ["L-01", "L-02"]
+      },
+      "อาคาร Safety": {
+        "ห้องเจ้าหน้าที่ จป.": ["L-01", "L-02"]
+      },
+      "อาคารคอยกรีต": {
+        "พื้นที่การผลิต": ["L-01", "L-02"]
+      },
+      "อาคารซ่อมบำรุง": {
+        "ช็อปซ่อมบำรุง": ["L-01", "L-02", "L-03"]
+      },
+      "โรงผลิตน้ำดื่ม": {
+        "พื้นที่ผลิต": ["L-01", "L-02"]
+      },
+      "ศูนย์ฝึกอบรม": {
+        "ห้องอบรม 1": ["L-01", "L-02", "L-03"]
       }
     };
 
@@ -239,7 +291,7 @@
     let state = { building: '', room: '', lightNo: '' };
 
     function loadInitialData() {
-      const savedMaster = localStorage.getItem('light_master_data');
+      const savedMaster = localStorage.getItem('light_master_data_v2');
       masterData = savedMaster ? JSON.parse(savedMaster) : JSON.parse(JSON.stringify(initialMasterData));
 
       const savedPresets = localStorage.getItem('light_preset_items');
@@ -252,7 +304,7 @@
     }
 
     function saveMasterData() {
-      localStorage.setItem('light_master_data', JSON.stringify(masterData));
+      localStorage.setItem('light_master_data_v2', JSON.stringify(masterData));
       renderBuildings();
     }
 
@@ -336,12 +388,14 @@
       listDiv.innerHTML = '';
       Object.keys(masterData).forEach(bName => {
         const btn = document.createElement('button');
-        btn.className = 'p-6 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left group';
+        btn.className = 'p-4 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left group flex flex-col justify-between';
         btn.onclick = () => selectBuilding(bName);
         btn.innerHTML = `
-          <div class="text-3xl mb-2">🏢</div>
-          <div class="font-bold text-lg text-slate-800 group-hover:text-indigo-600">${bName}</div>
-          <div class="text-sm text-slate-500">จำนวน ${Object.keys(masterData[bName]).length} ห้อง</div>
+          <div>
+            <div class="text-2xl mb-1">🏢</div>
+            <div class="font-bold text-md text-slate-800 group-hover:text-indigo-600 line-clamp-1">${bName}</div>
+          </div>
+          <div class="text-xs text-slate-400 mt-2">${Object.keys(masterData[bName]).length} ห้อง/พื้นที่</div>
         `;
         listDiv.appendChild(btn);
       });
@@ -546,7 +600,7 @@
       }
 
       Object.keys(masterData).forEach(b => {
-        let html = `<div class="font-bold text-slate-800 flex justify-between items-center bg-slate-100 p-1 rounded">
+        let html = `<div class="font-bold text-slate-800 flex justify-between items-center bg-slate-100 p-1.5 rounded">
           <span>🏢 ${b}</span>
           <button onclick="deleteItem('${b}')" class="text-red-500 text-xs px-1 hover:underline">ลบอาคาร</button>
         </div>`;
@@ -574,7 +628,7 @@
     }
 
     function resetMasterData() {
-      if (confirm('คุณต้องการคืนค่าข้อมูลเป็นค่าเริ่มต้นหรือไม่?')) {
+      if (confirm('คุณต้องการคืนค่าข้อมูลเป็น 12 อาคารเริ่มต้นหรือไม่?')) {
         masterData = JSON.parse(JSON.stringify(initialMasterData));
         presetItems = [...initialPresetItems];
         saveMasterData();
@@ -645,7 +699,6 @@
       const filterL = document.getElementById('filter-light-no').value;
       const searchText = document.getElementById('filter-search').value.toLowerCase().trim();
 
-      // กรองข้อมูลตามเงื่อนไข Dropdown และ คำค้นหา
       const filtered = history.filter(item => {
         if (filterB && item.building !== filterB) return false;
         if (filterR && item.room !== filterR) return false;
