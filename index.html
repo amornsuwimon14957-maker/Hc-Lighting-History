@@ -5,19 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ</title>
 
-  <!-- Open Graph Meta Tags สำหรับโชว์โลโก้และข้อมูลเวลาแชร์ลิงก์ -->
+  <!-- Open Graph Meta Tags -->
   <meta property="og:title" content="ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ">
   <meta property="og:description" content="ระบบจัดการ และบันทึกประวัติการเปลี่ยนหลอดไฟประจำอาคาร">
   <meta property="og:image" content="https://i.postimg.cc/jj4MQZWK/Designing-HC-Lighting-Maintenanc-2K-202608232235.jpg">
   <meta property="og:type" content="website">
 
-  <!-- Favicon / ไอคอนแท็บเบราว์เซอร์ -->
+  <!-- Favicon -->
   <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/jj4MQZWK/Designing-HC-Lighting-Maintenanc-2K-202608232235.jpg">
 
   <script src="https://cdn.tailwindcss.com"></script>
   
   <style>
-    /* ตั้งค่าฉากหลังแบบ Fixed พร้อมใส่ Dark Overlay และ Blur อ่อนๆ เพื่อไม่ให้รำคาญตา */
     .app-background {
       position: fixed;
       top: 0;
@@ -43,7 +42,6 @@
   <div id="login-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5 border border-white/20">
       
-      <!-- Modal Header -->
       <div class="text-center space-y-2">
         <div class="w-16 h-16 rounded-xl overflow-hidden border-2 border-indigo-500 shadow-md mx-auto bg-white p-0.5">
           <img src="https://i.postimg.cc/jj4MQZWK/Designing-HC-Lighting-Maintenanc-2K-202608232235.jpg" alt="Logo" class="w-full h-full object-cover rounded-lg">
@@ -52,7 +50,6 @@
         <p class="text-xs text-slate-500">ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ</p>
       </div>
 
-      <!-- Login Form -->
       <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">👤 เลือกชื่อผู้ใช้งาน / ช่างผู้ซ่อม</label>
@@ -91,7 +88,6 @@
         </button>
       </form>
 
-      <!-- Credit In Login -->
       <div class="text-center pt-2 border-t border-slate-100 text-[10px] text-slate-400">
         By Amorn Amornkul | ฝ่ายซ่อมบำรุงเครื่องกลและไฟฟ้า
       </div>
@@ -102,7 +98,6 @@
   <!-- ==================== MAIN HEADER ==================== -->
   <header class="bg-indigo-600/95 backdrop-blur-md text-white shadow-md border-b border-indigo-500/30">
     <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-      <!-- Logo + Title -->
       <div class="flex items-center gap-3">
         <div 
           onclick="openImageModal('https://i.postimg.cc/jj4MQZWK/Designing-HC-Lighting-Maintenanc-2K-202608232235.jpg')"
@@ -124,21 +119,16 @@
         </div>
       </div>
 
-      <!-- Action Buttons + User Info & Credit -->
       <div class="flex items-center gap-3">
-        
-        <!-- เครดิตผู้พัฒนาโปรแกรม -->
         <div class="hidden md:block text-right text-[11px] text-indigo-100 bg-indigo-700/60 border border-indigo-500/50 px-2.5 py-1 rounded-md leading-tight">
           <div class="font-semibold text-white">By Amorn Amornkul</div>
           <div class="text-[10px] text-indigo-200">ฝ่ายซ่อมบำรุงเครื่องกลและไฟฟ้า</div>
         </div>
 
-        <!-- Logged User Info & Logout Button -->
         <div class="flex items-center gap-2">
           <div class="text-right hidden sm:block">
             <span id="current-user-display" class="text-xs font-bold text-white bg-indigo-700 px-2.5 py-1 rounded-md border border-indigo-500/50 block">👤 -</span>
           </div>
-          
           <button onclick="handleLogout()" class="bg-red-500/80 hover:bg-red-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-sm" title="ออกจากระบบ">
             🚪 ออก
           </button>
@@ -155,7 +145,6 @@
       </div>
     </div>
 
-    <!-- เครดิตแสดงบนหน้าจอมือถือเล็กๆ -->
     <div class="md:hidden bg-indigo-700/80 text-center py-1 text-[10px] text-indigo-100 border-t border-indigo-500/30">
       By Amorn Amornkul | ฝ่ายซ่อมบำรุงเครื่องกลและไฟฟ้า
     </div>
@@ -174,8 +163,6 @@
 
     <!-- STEP 1: เลือกอาคาร -->
     <section id="step-1" class="space-y-6">
-      
-      <!-- แผนผังภายในบริษัท -->
       <div class="bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/20">
         <h3 class="text-md font-semibold text-slate-700 mb-3 flex items-center gap-2">
           🗺️ แผนผังภายในบริษัท (Company Layout)
@@ -205,13 +192,14 @@
       </div>
     </section>
 
-    <!-- STEP 2: เลือกห้อง และ No. หลอดไฟ -->
-    <section id="step-2" class="hidden space-y-4">
+    <!-- STEP 2 & 3 COMBINED: เลือกห้อง + ฟอร์มระบุรายการในหน้าเดียวกัน -->
+    <section id="step-2-3" class="hidden space-y-4">
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold text-white drop-shadow">เลือกห้องและจุดที่ต้องการแจ้งเปลี่ยน</h2>
-        <button onclick="goToStep(1)" class="text-sm text-indigo-200 hover:text-white underline">← ย้อนกลับ</button>
+        <button onclick="goToStep(1)" class="text-sm text-indigo-200 hover:text-white underline">← ย้อนกลับเลือกอาคาร</button>
       </div>
 
+      <!-- ส่วนที่ 1: เลือกห้องและ No. หลอดไฟ -->
       <div class="bg-white/95 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20 space-y-4">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">ห้อง / พื้นที่</label>
@@ -222,53 +210,52 @@
 
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">No. หลอดไฟ / ตำแหน่งโคม</label>
-          <select id="light-no-select" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+          <select id="light-no-select" onchange="onLightSelected()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
             <option value="">-- เลือก No. หลอดไฟ --</option>
           </select>
         </div>
-
-        <button onclick="goToStep(3)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition shadow">
-          ถัดไป: ระบุรายการที่เปลี่ยน →
-        </button>
-      </div>
-    </section>
-
-    <!-- STEP 3: ฟอร์มระบุรายการเปลี่ยน + ปิดงาน -->
-    <section id="step-3" class="hidden space-y-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-white drop-shadow">ระบุรายละเอียดการเปลี่ยนอะไหล่</h2>
-        <button onclick="goToStep(2)" class="text-sm text-indigo-200 hover:text-white underline">← ย้อนกลับ</button>
       </div>
 
-      <form id="job-form" onsubmit="saveJob(event)" class="bg-white/95 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20 space-y-5">
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ปฏิบัติงาน / ช่าง</label>
-          <input type="text" id="technician-name" required readonly class="w-full p-2.5 border border-slate-200 bg-slate-100 rounded-lg text-slate-600 font-semibold cursor-not-allowed">
-        </div>
-
-        <!-- Dynamic Items Section -->
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <label class="block text-sm font-medium text-slate-700">รายการอุปกรณ์ที่เปลี่ยน</label>
-            <button type="button" onclick="addItemRow()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-semibold px-2.5 py-1 rounded border border-indigo-200 transition">
-              ➕ เพิ่มรายการ
-            </button>
+      <!-- ส่วนที่ 2: ฟอร์มระบุรายละเอียดและบันทึกปิดงาน (จะเด้งแสดงต่อลงมาด้านล่างเมื่อเลือกห้องและหลอดไฟแล้ว) -->
+      <div id="job-form-container" class="hidden transition-all duration-300">
+        <form id="job-form" onsubmit="saveJob(event)" class="bg-white/95 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20 space-y-5">
+          <div class="border-b border-slate-200 pb-3 mb-2">
+            <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
+              📝 ระบุรายละเอียดการเปลี่ยนอะไหล่
+            </h3>
+            <p class="text-xs text-slate-500">กรอกรายการอะไหล่และอุปกรณ์ที่ใช้ปฏิบัติงานจริง</p>
           </div>
-          
-          <datalist id="preset-items-list"></datalist>
 
-          <div id="items-container" class="space-y-2"></div>
-        </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ปฏิบัติงาน / ช่าง</label>
+            <input type="text" id="technician-name" required readonly class="w-full p-2.5 border border-slate-200 bg-slate-100 rounded-lg text-slate-600 font-semibold cursor-not-allowed">
+          </div>
 
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
-          <input type="text" id="job-note" placeholder="เช่น บัลลาสต์มีเสียงดัง, เปลี่ยนแทนของเดิมที่เสื่อมสภาพ" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
-        </div>
+          <!-- Dynamic Items Section -->
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <label class="block text-sm font-medium text-slate-700">รายการอุปกรณ์ที่เปลี่ยน</label>
+              <button type="button" onclick="addItemRow()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-semibold px-2.5 py-1 rounded border border-indigo-200 transition">
+                ➕ เพิ่มรายการ
+              </button>
+            </div>
+            
+            <datalist id="preset-items-list"></datalist>
 
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-sm transition flex justify-center items-center gap-2">
-          ✅ บันทึกปิดงาน
-        </button>
-      </form>
+            <div id="items-container" class="space-y-2"></div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+            <input type="text" id="job-note" placeholder="เช่น บัลลาสต์มีเสียงดัง, เปลี่ยนแทนของเดิมที่เสื่อมสภาพ" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+          </div>
+
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-sm transition flex justify-center items-center gap-2">
+            ✅ บันทึกปิดงาน
+          </button>
+        </form>
+      </div>
+
     </section>
 
   </main>
@@ -276,7 +263,6 @@
 
   <!-- ==================== MODALS ==================== -->
   
-  <!-- Modal สำหรับขยายรูปภาพ (Image Viewer Lightbox) -->
   <div id="image-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50 cursor-zoom-out" onclick="closeImageModal()">
     <div class="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center" onclick="event.stopPropagation()">
       <button onclick="closeImageModal()" class="absolute -top-10 right-0 text-white hover:text-slate-300 text-3xl font-bold focus:outline-none z-10">&times;</button>
@@ -284,7 +270,7 @@
     </div>
   </div>
 
-  <!-- Modal 1: จัดการข้อมูล (Admin) -->
+  <!-- Modal: จัดการข้อมูล (Admin) -->
   <div id="admin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col border border-slate-100">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
@@ -293,7 +279,6 @@
       </div>
       
       <div class="p-6 overflow-y-auto space-y-6 flex-1">
-        <!-- เพิ่มอะไหล่ล่วงหน้า -->
         <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 space-y-3">
           <h4 class="font-bold text-indigo-900 text-sm">💡 จัดการรายการอะไหล่สะสม</h4>
           <div class="flex gap-2">
@@ -303,7 +288,6 @@
           <div id="preset-items-tags" class="flex flex-wrap gap-1.5 pt-2"></div>
         </div>
 
-        <!-- 1. เพิ่มอาคาร -->
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
           <h4 class="font-bold text-slate-700 text-sm">🏢 เพิ่มอาคารใหม่</h4>
           <div class="flex gap-2">
@@ -312,7 +296,6 @@
           </div>
         </div>
 
-        <!-- 2. เพิ่มห้อง -->
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
           <h4 class="font-bold text-slate-700 text-sm">🚪 เพิ่มห้อง/พื้นที่</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -324,7 +307,6 @@
           <button onclick="addRoom()" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium">เพิ่มห้อง</button>
         </div>
 
-        <!-- 3. เพิ่ม No. หลอดไฟ -->
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
           <h4 class="font-bold text-slate-700 text-sm">💡 เพิ่ม No. หลอดไฟ</h4>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -339,7 +321,6 @@
           <button onclick="addLightNo()" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium">เพิ่ม No. หลอดไฟ</button>
         </div>
 
-        <!-- รายการโครงสร้างปัจจุบัน -->
         <div>
           <h4 class="font-bold text-slate-700 text-sm mb-2">📋 โครงสร้างข้อมูลปัจจุบัน</h4>
           <div id="master-data-tree" class="space-y-2 text-sm max-h-48 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-white"></div>
@@ -353,7 +334,7 @@
     </div>
   </div>
 
-  <!-- Modal 2: แสดงประวัติย้อนหลัง -->
+  <!-- Modal: แสดงประวัติย้อนหลัง -->
   <div id="history-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col border border-slate-100">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
@@ -361,7 +342,6 @@
         <button onclick="toggleHistoryModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
 
-      <!-- Filter Bar -->
       <div class="p-4 bg-slate-50 border-b border-slate-200 space-y-2">
         <div class="text-xs font-bold text-slate-600">🔍 กรองข้อมูลประวัติ</div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -393,7 +373,6 @@
 
   <!-- ==================== SCRIPT LOGIC ==================== -->
   <script>
-    // ฐานข้อมูลผู้ใช้งาน และรหัสผ่านพนักงาน
     const usersDatabase = {
       "อมร อมรกุล": "0308",
       "ปัญณวัฒน์ แสงนาค": "0107",
@@ -408,7 +387,6 @@
 
     let currentUser = null;
 
-    // ระบบ Login & Authentication
     function checkLoginStatus() {
       const savedUser = localStorage.getItem('logged_in_user');
       const loginModal = document.getElementById('login-modal');
@@ -449,7 +427,6 @@
       }
     }
 
-    // รายการอาคาร 12 อาคารเริ่มต้น
     const initialMasterData = {
       "1. อาคารสำนักงานใหญ่": {
         "ห้องประชุมใหญ่": ["L-01", "L-02", "L-03"],
@@ -561,7 +538,6 @@
       }
     }
 
-    // Dynamic Item Rows
     function addItemRow(name = '', qty = 1) {
       const container = document.getElementById('items-container');
       const rowId = 'item-row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
@@ -592,7 +568,6 @@
       addItemRow();
     }
 
-    // Navigation & UI
     function renderBuildings() {
       const listDiv = document.getElementById('building-list');
       listDiv.innerHTML = '';
@@ -613,8 +588,12 @@
 
     function selectBuilding(buildingName) {
       state.building = buildingName;
+      state.room = '';
+      state.lightNo = '';
+      
       document.getElementById('bc-building-name').innerText = buildingName;
       document.getElementById('bc-building').classList.remove('hidden');
+      document.getElementById('bc-room').classList.add('hidden');
 
       const roomSelect = document.getElementById('room-select');
       roomSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>';
@@ -626,13 +605,25 @@
           roomSelect.appendChild(opt);
         });
       }
+
+      // ซ่อนฟอร์มกรอกรายละเอียดจนกว่าจะเลือกห้องและหลอดไฟครบ
+      document.getElementById('job-form-container').classList.add('hidden');
+      document.getElementById('light-no-select').innerHTML = '<option value="">-- เลือก No. หลอดไฟ --</option>';
+
       goToStep(2);
     }
 
     function updateLightNumbers() {
       const selectedRoom = document.getElementById('room-select').value;
+      state.room = selectedRoom;
+      state.lightNo = '';
+
       const lightSelect = document.getElementById('light-no-select');
       lightSelect.innerHTML = '<option value="">-- เลือก No. หลอดไฟ --</option>';
+
+      // ซ่อนฟอร์มกรอกรายละเอียดเมื่อเปลี่ยนห้อง
+      document.getElementById('job-form-container').classList.add('hidden');
+      document.getElementById('bc-room').classList.add('hidden');
 
       if (selectedRoom && masterData[state.building] && masterData[state.building][selectedRoom]) {
         masterData[state.building][selectedRoom].forEach(lNo => {
@@ -644,29 +635,36 @@
       }
     }
 
-    function goToStep(stepNumber) {
-      if (stepNumber === 3) {
-        state.room = document.getElementById('room-select').value;
-        state.lightNo = document.getElementById('light-no-select').value;
+    // ฟังก์ชันนี้จะทำงานเมื่อเลือก No. หลอดไฟแล้ว จะทำให้ฟอร์มกรอกรายละเอียดเด้งแสดงต่อลงมาด้านล่างทันที
+    function onLightSelected() {
+      const selectedLight = document.getElementById('light-no-select').value;
+      state.lightNo = selectedLight;
+      const formContainer = document.getElementById('job-form-container');
 
-        if (!state.room || !state.lightNo) {
-          alert('กรุณาเลือกห้องและ No. หลอดไฟให้ครบถ้วน');
-          return;
-        }
-
+      if (selectedLight) {
         document.getElementById('bc-room-name').innerText = `${state.room} (${state.lightNo})`;
         document.getElementById('bc-room').classList.remove('hidden');
+        
         resetItemRows();
-      } else if (stepNumber === 2) {
+        formContainer.classList.remove('hidden');
+        
+        // เลื่อนหน้าจอลงมาให้เห็นฟอร์มที่เด้งขึ้นมาอย่างนุ่มนวล
+        formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        formContainer.classList.add('hidden');
         document.getElementById('bc-room').classList.add('hidden');
-      } else if (stepNumber === 1) {
+      }
+    }
+
+    function goToStep(stepNumber) {
+      if (stepNumber === 1) {
         document.getElementById('bc-building').classList.add('hidden');
         document.getElementById('bc-room').classList.add('hidden');
+        document.getElementById('job-form-container').classList.add('hidden');
       }
 
       document.getElementById('step-1').classList.toggle('hidden', stepNumber !== 1);
-      document.getElementById('step-2').classList.toggle('hidden', stepNumber !== 2);
-      document.getElementById('step-3').classList.toggle('hidden', stepNumber !== 3);
+      document.getElementById('step-2-3').classList.toggle('hidden', stepNumber !== 2);
     }
 
     function saveJob(e) {
@@ -716,7 +714,6 @@
       goToStep(1);
     }
 
-    // Image Modal Lightbox
     function openImageModal(imgSrc) {
       const modal = document.getElementById('image-modal');
       const modalImg = document.getElementById('image-modal-src');
@@ -729,7 +726,6 @@
       modal.classList.add('hidden');
     }
 
-    // Admin & Structure Functions
     function toggleAdminModal() {
       const modal = document.getElementById('admin-modal');
       const isHidden = modal.classList.contains('hidden');
@@ -868,7 +864,6 @@
       }
     }
 
-    // --- History Filter Modal ---
     function toggleHistoryModal() {
       const modal = document.getElementById('history-modal');
       const isHidden = modal.classList.contains('hidden');
@@ -982,7 +977,6 @@
       }
     }
 
-    // เริ่มต้นทำงานเมื่อโหลดหน้าเว็บ
     loadInitialData();
   </script>
 </body>
