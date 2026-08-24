@@ -15,12 +15,33 @@
   <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/jj4MQZWK/Designing-HC-Lighting-Maintenanc-2K-202608232235.jpg">
 
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    /* ตั้งค่าฉากหลังแบบ Fixed พร้อมใส่ Dark Overlay และ Blur อ่อนๆ เพื่อไม่ให้รำคาญตา */
+    .app-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -10;
+      background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)),
+        url('https://i.postimg.cc/52SK4Mht/blurred-empty-open-space-office-abstract-light-bokeh-office-interior-background-1028938-486600.avif');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-10 relative">
+<body class="min-h-screen text-slate-800 font-sans pb-10 relative">
+
+  <!-- ฉากหลังออฟฟิศ -->
+  <div class="app-background"></div>
 
   <!-- ==================== LOGIN MODAL SCREEN ==================== -->
   <div id="login-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5 border border-slate-100">
+    <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5 border border-white/20">
       
       <!-- Modal Header -->
       <div class="text-center space-y-2">
@@ -57,7 +78,7 @@
             required 
             placeholder="กรอกรหัสพนักงาน" 
             maxlength="10"
-            class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none tracking-widest"
+            class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none tracking-widest bg-white"
           >
         </div>
 
@@ -79,7 +100,7 @@
 
 
   <!-- ==================== MAIN HEADER ==================== -->
-  <header class="bg-indigo-600 text-white shadow-md">
+  <header class="bg-indigo-600/95 backdrop-blur-md text-white shadow-md border-b border-indigo-500/30">
     <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
       <!-- Logo + Title -->
       <div class="flex items-center gap-3">
@@ -145,17 +166,17 @@
   <main class="max-w-4xl mx-auto px-4 mt-6">
     
     <!-- Navigation Breadcrumb -->
-    <nav id="breadcrumb" class="text-sm font-medium text-slate-500 mb-4 flex items-center gap-2">
-      <span class="cursor-pointer hover:text-indigo-600" onclick="goToStep(1)">เลือกอาคาร</span>
-      <span id="bc-building" class="hidden">/ <span class="cursor-pointer hover:text-indigo-600" onclick="goToStep(2)" id="bc-building-name"></span></span>
-      <span id="bc-room" class="hidden">/ <span id="bc-room-name"></span></span>
+    <nav id="breadcrumb" class="text-sm font-medium text-white/90 bg-slate-900/40 backdrop-blur-sm px-3 py-2 rounded-lg mb-4 flex items-center gap-2 border border-white/10 shadow-sm">
+      <span class="cursor-pointer hover:text-indigo-300" onclick="goToStep(1)">เลือกอาคาร</span>
+      <span id="bc-building" class="hidden">/ <span class="cursor-pointer hover:text-indigo-300" onclick="goToStep(2)" id="bc-building-name"></span></span>
+      <span id="bc-room" class="hidden">/ <span id="bc-room-name" class="text-indigo-200 font-semibold"></span></span>
     </nav>
 
     <!-- STEP 1: เลือกอาคาร -->
     <section id="step-1" class="space-y-6">
       
       <!-- แผนผังภายในบริษัท -->
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+      <div class="bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/20">
         <h3 class="text-md font-semibold text-slate-700 mb-3 flex items-center gap-2">
           🗺️ แผนผังภายในบริษัท (Company Layout)
         </h3>
@@ -170,7 +191,7 @@
             title="คลิกเพื่อดูรูปภาพขนาดใหญ่"
           />
           <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <span class="bg-black/70 text-white text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
+            <span class="bg-black/75 text-white text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
               🔍 คลิกเพื่อขยายภาพ
             </span>
           </div>
@@ -179,7 +200,7 @@
       </div>
 
       <div>
-        <h2 class="text-lg font-semibold text-slate-700 mb-3">เลือกอาคารที่ต้องการดำเนินงาน</h2>
+        <h2 class="text-lg font-semibold text-white drop-shadow mb-3">เลือกอาคารที่ต้องการดำเนินงาน</h2>
         <div id="building-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
       </div>
     </section>
@@ -187,26 +208,26 @@
     <!-- STEP 2: เลือกห้อง และ No. หลอดไฟ -->
     <section id="step-2" class="hidden space-y-4">
       <div class="flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-slate-700">เลือกห้องและจุดที่ต้องการแจ้งเปลี่ยน</h2>
-        <button onclick="goToStep(1)" class="text-sm text-indigo-600 hover:underline">← ย้อนกลับ</button>
+        <h2 class="text-lg font-semibold text-white drop-shadow">เลือกห้องและจุดที่ต้องการแจ้งเปลี่ยน</h2>
+        <button onclick="goToStep(1)" class="text-sm text-indigo-200 hover:text-white underline">← ย้อนกลับ</button>
       </div>
 
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+      <div class="bg-white/95 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20 space-y-4">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">ห้อง / พื้นที่</label>
-          <select id="room-select" onchange="updateLightNumbers()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <select id="room-select" onchange="updateLightNumbers()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
             <option value="">-- เลือกห้อง --</option>
           </select>
         </div>
 
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">No. หลอดไฟ / ตำแหน่งโคม</label>
-          <select id="light-no-select" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <select id="light-no-select" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
             <option value="">-- เลือก No. หลอดไฟ --</option>
           </select>
         </div>
 
-        <button onclick="goToStep(3)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition">
+        <button onclick="goToStep(3)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition shadow">
           ถัดไป: ระบุรายการที่เปลี่ยน →
         </button>
       </div>
@@ -215,11 +236,11 @@
     <!-- STEP 3: ฟอร์มระบุรายการเปลี่ยน + ปิดงาน -->
     <section id="step-3" class="hidden space-y-4">
       <div class="flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-slate-700">ระบุรายละเอียดการเปลี่ยนอะไหล่</h2>
-        <button onclick="goToStep(2)" class="text-sm text-indigo-600 hover:underline">← ย้อนกลับ</button>
+        <h2 class="text-lg font-semibold text-white drop-shadow">ระบุรายละเอียดการเปลี่ยนอะไหล่</h2>
+        <button onclick="goToStep(2)" class="text-sm text-indigo-200 hover:text-white underline">← ย้อนกลับ</button>
       </div>
 
-      <form id="job-form" onsubmit="saveJob(event)" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-5">
+      <form id="job-form" onsubmit="saveJob(event)" class="bg-white/95 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20 space-y-5">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ปฏิบัติงาน / ช่าง</label>
           <input type="text" id="technician-name" required readonly class="w-full p-2.5 border border-slate-200 bg-slate-100 rounded-lg text-slate-600 font-semibold cursor-not-allowed">
@@ -241,7 +262,7 @@
 
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
-          <input type="text" id="job-note" placeholder="เช่น บัลลาสต์มีเสียงดัง, เปลี่ยนแทนของเดิมที่เสื่อมสภาพ" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <input type="text" id="job-note" placeholder="เช่น บัลลาสต์มีเสียงดัง, เปลี่ยนแทนของเดิมที่เสื่อมสภาพ" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
         </div>
 
         <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-sm transition flex justify-center items-center gap-2">
@@ -264,8 +285,8 @@
   </div>
 
   <!-- Modal 1: จัดการข้อมูล (Admin) -->
-  <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+  <div id="admin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col border border-slate-100">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">⚙️ จัดการข้อมูลระบบ</h3>
         <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
@@ -276,7 +297,7 @@
         <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 space-y-3">
           <h4 class="font-bold text-indigo-900 text-sm">💡 จัดการรายการอะไหล่สะสม</h4>
           <div class="flex gap-2">
-            <input type="text" id="new-preset-item-input" placeholder="ชื่ออุปกรณ์ เช่น หลอดไฟ LED 18W" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm">
+            <input type="text" id="new-preset-item-input" placeholder="ชื่ออุปกรณ์ เช่น หลอดไฟ LED 18W" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm bg-white">
             <button onclick="addPresetItemFromAdmin()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่มอุปกรณ์</button>
           </div>
           <div id="preset-items-tags" class="flex flex-wrap gap-1.5 pt-2"></div>
@@ -286,7 +307,7 @@
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
           <h4 class="font-bold text-slate-700 text-sm">🏢 เพิ่มอาคารใหม่</h4>
           <div class="flex gap-2">
-            <input type="text" id="new-building-input" placeholder="ชื่ออาคาร เช่น 13. อาคารคลังสินค้า" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm">
+            <input type="text" id="new-building-input" placeholder="ชื่ออาคาร เช่น 13. อาคารคลังสินค้า" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm bg-white">
             <button onclick="addBuilding()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่ม</button>
           </div>
         </div>
@@ -295,10 +316,10 @@
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
           <h4 class="font-bold text-slate-700 text-sm">🚪 เพิ่มห้อง/พื้นที่</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <select id="admin-building-select" class="p-2 border border-slate-300 rounded-lg text-sm">
+            <select id="admin-building-select" class="p-2 border border-slate-300 rounded-lg text-sm bg-white">
               <option value="">-- เลือกอาคาร --</option>
             </select>
-            <input type="text" id="new-room-input" placeholder="ชื่อห้อง เช่น ห้องทำงาน" class="p-2 border border-slate-300 rounded-lg text-sm">
+            <input type="text" id="new-room-input" placeholder="ชื่อห้อง เช่น ห้องทำงาน" class="p-2 border border-slate-300 rounded-lg text-sm bg-white">
           </div>
           <button onclick="addRoom()" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium">เพิ่มห้อง</button>
         </div>
@@ -307,13 +328,13 @@
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
           <h4 class="font-bold text-slate-700 text-sm">💡 เพิ่ม No. หลอดไฟ</h4>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <select id="admin-building-select-2" onchange="updateAdminRoomSelect()" class="p-2 border border-slate-300 rounded-lg text-sm">
+            <select id="admin-building-select-2" onchange="updateAdminRoomSelect()" class="p-2 border border-slate-300 rounded-lg text-sm bg-white">
               <option value="">-- เลือกอาคาร --</option>
             </select>
-            <select id="admin-room-select" class="p-2 border border-slate-300 rounded-lg text-sm">
+            <select id="admin-room-select" class="p-2 border border-slate-300 rounded-lg text-sm bg-white">
               <option value="">-- เลือกห้อง --</option>
             </select>
-            <input type="text" id="new-light-input" placeholder="รหัสหลอด เช่น L-01" class="p-2 border border-slate-300 rounded-lg text-sm">
+            <input type="text" id="new-light-input" placeholder="รหัสหลอด เช่น L-01" class="p-2 border border-slate-300 rounded-lg text-sm bg-white">
           </div>
           <button onclick="addLightNo()" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-2 rounded-lg text-sm font-medium">เพิ่ม No. หลอดไฟ</button>
         </div>
@@ -325,7 +346,7 @@
         </div>
       </div>
 
-      <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
+      <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50 rounded-b-2xl">
         <button onclick="resetMasterData()" class="text-xs text-red-500 hover:underline">รีเซ็ตข้อมูลเป็น 12 อาคารเริ่มต้น</button>
         <button onclick="toggleAdminModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium">ปิด</button>
       </div>
@@ -333,8 +354,8 @@
   </div>
 
   <!-- Modal 2: แสดงประวัติย้อนหลัง -->
-  <div id="history-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col">
+  <div id="history-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col border border-slate-100">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">📜 ประวัติการเปลี่ยนหลอดไฟ</h3>
         <button onclick="toggleHistoryModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
@@ -344,25 +365,25 @@
       <div class="p-4 bg-slate-50 border-b border-slate-200 space-y-2">
         <div class="text-xs font-bold text-slate-600">🔍 กรองข้อมูลประวัติ</div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <select id="filter-building" onchange="onFilterBuildingChange()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <select id="filter-building" onchange="onFilterBuildingChange()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
             <option value="">🏢 ทุกอาคาร</option>
           </select>
-          <select id="filter-room" onchange="onFilterRoomChange()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <select id="filter-room" onchange="onFilterRoomChange()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
             <option value="">🚪 ทุกห้อง</option>
           </select>
-          <select id="filter-light-no" onchange="renderHistory()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <select id="filter-light-no" onchange="renderHistory()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
             <option value="">💡 ทุก No. หลอดไฟ</option>
           </select>
         </div>
 
         <div>
-          <input type="text" id="filter-search" oninput="renderHistory()" placeholder="🔎 ค้นหาด้วยคำ เช่น ชื่อช่าง, ชื่ออะไหล่..." class="w-full p-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <input type="text" id="filter-search" oninput="renderHistory()" placeholder="🔎 ค้นหาด้วยคำ เช่น ชื่อช่าง, ชื่ออะไหล่..." class="w-full p-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
         </div>
       </div>
       
       <div class="p-4 overflow-y-auto space-y-3 flex-1" id="history-list"></div>
 
-      <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
+      <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50 rounded-b-2xl">
         <button onclick="clearHistory()" class="text-xs text-red-500 hover:underline">ล้างประวัติทั้งหมด</button>
         <button onclick="toggleHistoryModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium">ปิด</button>
       </div>
@@ -549,8 +570,8 @@
       div.id = rowId;
       div.className = 'flex gap-2 items-center';
       div.innerHTML = `
-        <input type="text" list="preset-items-list" placeholder="เลือกหรือพิมพ์ชื่ออุปกรณ์" value="${name}" required class="item-name flex-1 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
-        <input type="number" min="1" value="${qty}" required class="item-qty w-24 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm text-center" placeholder="จำนวน">
+        <input type="text" list="preset-items-list" placeholder="เลือกหรือพิมพ์ชื่ออุปกรณ์" value="${name}" required class="item-name flex-1 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm bg-white">
+        <input type="number" min="1" value="${qty}" required class="item-qty w-24 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm text-center bg-white" placeholder="จำนวน">
         <span class="text-xs text-slate-500">ชิ้น</span>
         <button type="button" onclick="removeItemRow('${rowId}')" class="text-slate-400 hover:text-red-500 p-2 font-bold text-lg">&times;</button>
       `;
@@ -577,7 +598,7 @@
       listDiv.innerHTML = '';
       Object.keys(masterData).forEach(bName => {
         const btn = document.createElement('button');
-        btn.className = 'p-4 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left group flex flex-col justify-between';
+        btn.className = 'p-4 bg-white/95 backdrop-blur-md rounded-xl shadow-md border border-white/20 hover:border-indigo-500 hover:shadow-lg transition text-left group flex flex-col justify-between';
         btn.onclick = () => selectBuilding(bName);
         btn.innerHTML = `
           <div>
