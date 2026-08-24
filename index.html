@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ</title>
 
-  <!-- Open Graph Meta Tags สำหรับโชว์โลโก้และข้อมูลเวลาแชร์ลิงก์ใน LINE / Facebook -->
+  <!-- Open Graph Meta Tags สำหรับโชว์โลโก้และข้อมูลเวลาแชร์ลิงก์ -->
   <meta property="og:title" content="ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ">
   <meta property="og:description" content="ระบบจัดการ และบันทึกประวัติการเปลี่ยนหลอดไฟประจำอาคาร">
   <meta property="og:image" content="https://i.postimg.cc/jj4MQZWK/Designing-HC-Lighting-Maintenanc-2K-202608232235.jpg">
@@ -18,7 +18,67 @@
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-10 relative">
 
-  <!-- Header -->
+  <!-- ==================== LOGIN MODAL SCREEN ==================== -->
+  <div id="login-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5 border border-slate-100">
+      
+      <!-- Modal Header -->
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 rounded-xl overflow-hidden border-2 border-indigo-500 shadow-md mx-auto bg-white p-0.5">
+          <img src="https://i.postimg.cc/jj4MQZWK/Designing-HC-Lighting-Maintenanc-2K-202608232235.jpg" alt="Logo" class="w-full h-full object-cover rounded-lg">
+        </div>
+        <h2 class="text-xl font-bold text-slate-800">เข้าสู่ระบบ (Login)</h2>
+        <p class="text-xs text-slate-500">ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">👤 เลือกชื่อผู้ใช้งาน / ช่างผู้ซ่อม</label>
+          <select id="login-user-select" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-800">
+            <option value="">-- เลือกชื่อผู้ใช้งาน --</option>
+            <option value="อมร อมรกุล">อมร อมรกุล</option>
+            <option value="ปัญณวัฒน์ แสงนาค">ปัญณวัฒน์ แสงนาค</option>
+            <option value="ชาติชาย หนิ้ววิยะวงค์">ชาติชาย หนิ้ววิยะวงค์</option>
+            <option value="สงกรานต์ ช่องสูงเนิน">สงกรานต์ ช่องสูงเนิน</option>
+            <option value="วิมลรัตน์ ยุทธรศาร">วิมลรัตน์ ยุทธรศาร</option>
+            <option value="ประมวลศักดิ์ ทูลฉลอง">ประมวลศักดิ์ ทูลฉลอง</option>
+            <option value="เอกพนธ์ พาซอและ">เอกพนธ์ พาซอและ</option>
+            <option value="รัชชานนท์ อาจอ">รัชชานนท์ อาจอ</option>
+            <option value="อดิศักดิ์ สุขดี">อดิศักดิ์ สุขดี</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">🔑 รหัสผ่าน (รหัสพนักงาน)</label>
+          <input 
+            type="password" 
+            id="login-password-input" 
+            required 
+            placeholder="กรอกรหัสพนักงาน (เช่น 0308)" 
+            maxlength="10"
+            class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none tracking-widest"
+          >
+        </div>
+
+        <div id="login-error-msg" class="text-xs text-red-500 text-center font-semibold hidden">
+          ❌ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
+        </div>
+
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold py-2.5 rounded-lg shadow transition text-sm">
+          เข้าสู่ระบบ 🔑
+        </button>
+      </form>
+
+      <!-- Credit In Login -->
+      <div class="text-center pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+        By Amorn Amornkul | ฝ่ายซ่อมบำรุงเครื่องกลและไฟฟ้า
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== MAIN HEADER ==================== -->
   <header class="bg-indigo-600 text-white shadow-md">
     <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
       <!-- Logo + Title -->
@@ -43,19 +103,31 @@
         </div>
       </div>
 
-      <!-- Action Buttons + Credit -->
+      <!-- Action Buttons + User Info & Credit -->
       <div class="flex items-center gap-3">
+        
         <!-- เครดิตผู้พัฒนาโปรแกรม -->
-        <div class="hidden sm:block text-right text-[11px] text-indigo-100 bg-indigo-700/60 border border-indigo-500/50 px-2.5 py-1 rounded-md leading-tight">
+        <div class="hidden md:block text-right text-[11px] text-indigo-100 bg-indigo-700/60 border border-indigo-500/50 px-2.5 py-1 rounded-md leading-tight">
           <div class="font-semibold text-white">By Amorn Amornkul</div>
           <div class="text-[10px] text-indigo-200">ฝ่ายซ่อมบำรุงเครื่องกลและไฟฟ้า</div>
         </div>
 
-        <div class="flex gap-2">
-          <button onclick="toggleAdminModal()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow-sm">
-            ⚙️ จัดการข้อมูล
+        <!-- Logged User Info & Logout Button -->
+        <div class="flex items-center gap-2">
+          <div class="text-right hidden sm:block">
+            <span id="current-user-display" class="text-xs font-bold text-white bg-indigo-700 px-2.5 py-1 rounded-md border border-indigo-500/50 block">👤 -</span>
+          </div>
+          
+          <button onclick="handleLogout()" class="bg-red-500/80 hover:bg-red-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-sm" title="ออกจากระบบ">
+            🚪 ออก
           </button>
-          <button onclick="toggleHistoryModal()" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow-sm">
+        </div>
+
+        <div class="flex gap-1.5">
+          <button onclick="toggleAdminModal()" class="bg-indigo-800 hover:bg-indigo-900 px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-sm">
+            ⚙️ จัดการ
+          </button>
+          <button onclick="toggleHistoryModal()" class="bg-indigo-700 hover:bg-indigo-800 px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-sm">
             📜 ประวัติ
           </button>
         </div>
@@ -63,11 +135,13 @@
     </div>
 
     <!-- เครดิตแสดงบนหน้าจอมือถือเล็กๆ -->
-    <div class="sm:hidden bg-indigo-700/80 text-center py-1 text-[10px] text-indigo-100 border-t border-indigo-500/30">
+    <div class="md:hidden bg-indigo-700/80 text-center py-1 text-[10px] text-indigo-100 border-t border-indigo-500/30">
       By Amorn Amornkul | ฝ่ายซ่อมบำรุงเครื่องกลและไฟฟ้า
     </div>
   </header>
 
+
+  <!-- ==================== MAIN CONTENT ==================== -->
   <main class="max-w-4xl mx-auto px-4 mt-6">
     
     <!-- Navigation Breadcrumb -->
@@ -148,7 +222,7 @@
       <form id="job-form" onsubmit="saveJob(event)" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-5">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ปฏิบัติงาน / ช่าง</label>
-          <input type="text" id="technician-name" required placeholder="ระบุชื่อผู้เปลี่ยน" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <input type="text" id="technician-name" required readonly class="w-full p-2.5 border border-slate-200 bg-slate-100 rounded-lg text-slate-600 font-semibold cursor-not-allowed">
         </div>
 
         <!-- Dynamic Items Section -->
@@ -178,6 +252,9 @@
 
   </main>
 
+
+  <!-- ==================== MODALS ==================== -->
+  
   <!-- Modal สำหรับขยายรูปภาพ (Image Viewer Lightbox) -->
   <div id="image-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50 cursor-zoom-out" onclick="closeImageModal()">
     <div class="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center" onclick="event.stopPropagation()">
@@ -255,7 +332,7 @@
     </div>
   </div>
 
-  <!-- Modal 2: แสดงประวัติย้อนหลัง (มีระบบกรอง) -->
+  <!-- Modal 2: แสดงประวัติย้อนหลัง -->
   <div id="history-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
@@ -267,23 +344,17 @@
       <div class="p-4 bg-slate-50 border-b border-slate-200 space-y-2">
         <div class="text-xs font-bold text-slate-600">🔍 กรองข้อมูลประวัติ</div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <!-- Filter Building -->
           <select id="filter-building" onchange="onFilterBuildingChange()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="">🏢 ทุกอาคาร</option>
           </select>
-
-          <!-- Filter Room -->
           <select id="filter-room" onchange="onFilterRoomChange()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="">🚪 ทุกห้อง</option>
           </select>
-
-          <!-- Filter Light No -->
           <select id="filter-light-no" onchange="renderHistory()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="">💡 ทุก No. หลอดไฟ</option>
           </select>
         </div>
 
-        <!-- Search Keyword Input -->
         <div>
           <input type="text" id="filter-search" oninput="renderHistory()" placeholder="🔎 ค้นหาด้วยคำ เช่น ชื่อช่าง, ชื่ออะไหล่..." class="w-full p-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
@@ -298,8 +369,66 @@
     </div>
   </div>
 
+
+  <!-- ==================== SCRIPT LOGIC ==================== -->
   <script>
-    // รายการอาคารทั้ง 12 อาคาร
+    // ฐานข้อมูลผู้ใช้งาน และรหัสผ่านพนักงาน
+    const usersDatabase = {
+      "อมร อมรกุล": "0308",
+      "ปัญณวัฒน์ แสงนาค": "0107",
+      "ชาติชาย หนิ้ววิยะวงค์": "0290",
+      "สงกรานต์ ช่องสูงเนิน": "0398",
+      "วิมลรัตน์ ยุทธรศาร": "0586",
+      "ประมวลศักดิ์ ทูลฉลอง": "0626",
+      "เอกพนธ์ พาซอและ": "0628",
+      "รัชชานนท์ อาจอ": "0749",
+      "อดิศักดิ์ สุขดี": "0267"
+    };
+
+    let currentUser = null;
+
+    // ระบบ Login & Authentication
+    function checkLoginStatus() {
+      const savedUser = localStorage.getItem('logged_in_user');
+      const loginModal = document.getElementById('login-modal');
+      
+      if (savedUser && usersDatabase[savedUser]) {
+        currentUser = savedUser;
+        document.getElementById('current-user-display').innerText = `👤 ${currentUser}`;
+        document.getElementById('technician-name').value = currentUser;
+        loginModal.classList.add('hidden');
+      } else {
+        currentUser = null;
+        loginModal.classList.remove('hidden');
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const selectedUser = document.getElementById('login-user-select').value;
+      const inputPass = document.getElementById('login-password-input').value.trim();
+      const errorMsg = document.getElementById('login-error-msg');
+
+      if (!selectedUser || !inputPass) return;
+
+      if (usersDatabase[selectedUser] === inputPass) {
+        localStorage.setItem('logged_in_user', selectedUser);
+        errorMsg.classList.add('hidden');
+        document.getElementById('login-password-input').value = '';
+        checkLoginStatus();
+      } else {
+        errorMsg.classList.remove('hidden');
+      }
+    }
+
+    function handleLogout() {
+      if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+        localStorage.removeItem('logged_in_user');
+        checkLoginStatus();
+      }
+    }
+
+    // รายการอาคาร 12 อาคารเริ่มต้น
     const initialMasterData = {
       "1. อาคารสำนักงานใหญ่": {
         "ห้องประชุมใหญ่": ["L-01", "L-02", "L-03"],
@@ -349,6 +478,8 @@
     let state = { building: '', room: '', lightNo: '' };
 
     function loadInitialData() {
+      checkLoginStatus();
+
       const savedMaster = localStorage.getItem('light_master_data_v3');
       masterData = savedMaster ? JSON.parse(savedMaster) : JSON.parse(JSON.stringify(initialMasterData));
 
@@ -520,6 +651,12 @@
     function saveJob(e) {
       e.preventDefault();
 
+      if (!currentUser) {
+        alert('กรุณาเข้าสู่ระบบก่อนทำการบันทึกข้อมูล');
+        checkLoginStatus();
+        return;
+      }
+
       const itemRows = document.querySelectorAll('#items-container > div');
       const itemsList = [];
 
@@ -543,7 +680,7 @@
         building: state.building,
         room: state.room,
         lightNo: state.lightNo,
-        technician: document.getElementById('technician-name').value,
+        technician: currentUser,
         items: itemsList,
         note: document.getElementById('job-note').value
       };
@@ -554,6 +691,7 @@
 
       alert('บันทึกการเปลี่ยนหลอดไฟเรียบร้อยแล้ว!');
       document.getElementById('job-form').reset();
+      document.getElementById('technician-name').value = currentUser;
       goToStep(1);
     }
 
@@ -823,6 +961,7 @@
       }
     }
 
+    // เริ่มต้นทำงานเมื่อโหลดหน้าเว็บ
     loadInitialData();
   </script>
 </body>
