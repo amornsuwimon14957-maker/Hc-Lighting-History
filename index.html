@@ -322,13 +322,17 @@
         </div>
 
         <div>
-          <h4 class="font-bold text-slate-700 text-sm mb-2">📋 โครงสร้างข้อมูลปัจจุบัน</h4>
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="font-bold text-slate-700 text-sm">📋 โครงสร้างข้อมูลปัจจุบัน</h4>
+            <span id="admin-permission-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800 hidden">🔒 โหมดจำกัดสิทธิ์การลบ (เฉพาะ อมร อมรกุล)</span>
+          </div>
           <div id="master-data-tree" class="space-y-2 text-sm max-h-48 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-white"></div>
         </div>
       </div>
 
       <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50 rounded-b-2xl">
-        <button onclick="resetMasterData()" class="text-xs text-red-500 hover:underline">รีเซ็ตข้อมูลเป็นค่าเริ่มต้น</button>
+        <button id="btn-reset-master" onclick="resetMasterData()" class="text-xs text-red-500 hover:underline hidden">รีเซ็ตข้อมูลเป็นค่าเริ่มต้น</button>
+        <div id="non-admin-note" class="text-xs text-slate-400">สิทธิ์ผู้ใช้งานทั่วไป (เพิ่มข้อมูลได้ / ลบข้อมูลไม่ได้)</div>
         <button onclick="toggleAdminModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium">ปิด</button>
       </div>
     </div>
@@ -479,7 +483,6 @@
     let presetItems = [];
     let state = { building: '', room: '', lightNo: '' };
 
-    // --- ฟังก์ชันโหลดข้อมูลโครงสร้างและรายการอุปกรณ์จากเซิร์ฟเวอร์กลาง ---
     async function loadMasterDataFromServer() {
       checkLoginStatus();
       try {
@@ -487,12 +490,10 @@
         const data = await res.json();
 
         if (Array.isArray(data) && data.length > 0 && data[0].items) {
-          // ดึงโครงสร้างจากเซิร์ฟเวอร์กลาง
           const parsed = JSON.parse(data[0].items);
           masterData = parsed.masterData || initialMasterData;
           presetItems = parsed.presetItems || initialPresetItems;
         } else {
-          // ถ้ายังไม่มีในเซิร์ฟเวอร์ ให้ใช้ค่าเริ่มต้นและบันทึกขึ้นไปครั้งแรก
           masterData = JSON.parse(JSON.stringify(initialMasterData));
           presetItems = [...initialPresetItems];
           await saveMasterDataToServer();
@@ -507,7 +508,6 @@
       updateDatalist();
     }
 
-    // --- ฟังก์ชันบันทึกข้อมูลโครงสร้างขึ้นเซิร์ฟเวอร์กลาง (SheetDB) ---
     async function saveMasterDataToServer() {
       const payload = {
         id: "CONFIG_MASTER_DATA",
@@ -560,10 +560,12 @@
     function renderPresetTags() {
       const container = document.getElementById('preset-items-tags');
       if (!container) return;
+      const isAdmin = (currentUser === "อมร อมรกุล");
+      
       container.innerHTML = presetItems.map((item, index) => `
         <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
           ${item}
-          <button onclick="removePresetItem(${index})" class="text-indigo-500 hover:text-red-500 font-bold">&times;</button>
+          ${isAdmin ? `<button onclick="removePresetItem(${index})" class="text-indigo-500 hover:text-red-500 font-bold ml-1" title="ลบอุปกรณ์">&times;</button>` : ''}
         </span>
       `).join('');
     }
@@ -577,8 +579,15 @@
     }
 
     async function removePresetItem(index) {
-      presetItems.splice(index, 1);
-      await savePresetItems();
+      if (currentUser !== "อมร อมรกุล") {
+        alert('เฉพาะ "อมร อมรกุล" เท่านั้นที่มีสิทธิ์ลบรายการได้ครับ');
+        return;
+      }
+      if (confirm(`คุณต้องการลบอุปกรณ์ "${presetItems[index]}" หรือไม่?`)) {
+        presetItems.splice(index, 1);
+        await savePresetItems();
+        renderDataTree();
+      }
     }
 
     async function addPresetItemFromAdmin() {
@@ -714,7 +723,6 @@
       document.getElementById('step-2-3').classList.toggle('hidden', stepNumber !== 2);
     }
 
-    // --- ฟังก์ชันบันทึกข้อมูลส่งเข้า SheetDB กลาง (ค้างอยู่ที่เดิมหลังบันทึก) ---
     async function saveJob(e) {
       e.preventDefault();
 
@@ -766,7 +774,6 @@
 
         alert('บันทึกการเปลี่ยนหลอดไฟเรียบร้อยแล้ว!');
         
-        // เคลียร์เฉพาะฟอร์มกรอกรายการและหมายเหตุ แต่ยังคงอยู่ที่หน้าเดิมเพื่อเลือก No. หลอดอื่นต่อได้ทันที
         document.getElementById('job-note').value = '';
         resetItemRows();
         
@@ -795,9 +802,27 @@
         populateAdminDropdowns();
         renderDataTree();
         renderPresetTags();
+        updateAdminUIPermissions();
         modal.classList.remove('hidden');
       } else {
         modal.classList.add('hidden');
+      }
+    }
+
+    function updateAdminUIPermissions() {
+      const isAdmin = (currentUser === "อมร อมรกุล");
+      const badge = document.getElementById('admin-permission-badge');
+      const resetBtn = document.getElementById('btn-reset-master');
+      const nonAdminNote = document.getElementById('non-admin-note');
+
+      if (isAdmin) {
+        if(badge) badge.classList.remove('hidden');
+        if(resetBtn) resetBtn.classList.remove('hidden');
+        if(nonAdminNote) nonAdminNote.classList.add('hidden');
+      } else {
+        if(badge) badge.classList.add('hidden');
+        if(resetBtn) resetBtn.classList.add('hidden');
+        if(nonAdminNote) nonAdminNote.classList.remove('hidden');
       }
     }
 
@@ -874,7 +899,18 @@
     }
 
     async function deleteItem(bName, rName = null, lNo = null) {
-      if (!confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) return;
+      if (currentUser !== "อมร อมรกุล") {
+        alert('เฉพาะ "อมร อมรกุล" เท่านั้นที่มีสิทธิ์ลบข้อมูลครับ');
+        return;
+      }
+
+      let targetName = bName;
+      if (lNo) targetName = `No. หลอดไฟ (${lNo}) ในห้อง (${rName})`;
+      else if (rName) targetName = `ห้อง (${rName}) ในอาคาร (${bName})`;
+      else targetName = `อาคาร (${bName})`;
+
+      if (!confirm(`คุณต้องการลบ ${targetName} ใช่หรือไม่?`)) return;
+
       if (lNo) masterData[bName][rName] = masterData[bName][rName].filter(item => item !== lNo);
       else if (rName) delete masterData[bName][rName];
       else delete masterData[bName];
@@ -894,25 +930,27 @@
         return;
       }
 
+      const isAdmin = (currentUser === "อมร อมรกุล");
+
       Object.keys(masterData).forEach(b => {
         let html = `<div class="font-bold text-slate-800 flex justify-between items-center bg-slate-100 p-1.5 rounded">
           <span>🏢 ${b}</span>
-          <button onclick="deleteItem('${b}')" class="text-red-500 text-xs px-1 hover:underline">ลบอาคาร</button>
+          ${isAdmin ? `<button onclick="deleteItem('${b}')" class="text-red-500 text-xs px-1 hover:underline font-semibold">ลบอาคาร</button>` : ''}
         </div>`;
 
         Object.keys(masterData[b]).forEach(r => {
           html += `<div class="ml-4 text-slate-700 flex justify-between items-center my-1">
             <span>🚪 ${r}</span>
-            <button onclick="deleteItem('${b}', '${r}')" class="text-red-500 text-xs px-1 hover:underline">ลบห้อง</button>
+            ${isAdmin ? `<button onclick="deleteItem('${b}', '${r}')" class="text-red-500 text-xs px-1 hover:underline font-semibold">ลบห้อง</button>` : ''}
           </div>`;
 
           const lights = masterData[b][r];
           if (lights.length > 0) {
-            html += `<div class="ml-8 text-slate-500 text-xs flex flex-wrap gap-1 mb-1">`;
+            html += `<div class="ml-8 text-slate-500 text-xs flex flex-wrap gap-1.5 mb-1">`;
             lights.forEach(l => {
               html += `<span class="bg-slate-200 px-1.5 py-0.5 rounded flex items-center gap-1">
                 💡 ${l}
-                <button onclick="deleteItem('${b}', '${r}', '${l}')" class="text-red-500 font-bold hover:text-red-700">&times;</button>
+                ${isAdmin ? `<button onclick="deleteItem('${b}', '${r}', '${l}')" class="text-red-500 font-bold hover:text-red-700 ml-0.5" title="ลบหลอดนี้">&times;</button>` : ''}
               </span>`;
             });
             html += `</div>`;
@@ -923,6 +961,10 @@
     }
 
     async function resetMasterData() {
+      if (currentUser !== "อมร อมรกุล") {
+        alert('เฉพาะ "อมร อมรกุล" เท่านั้นที่มีสิทธิ์รีเซ็ตข้อมูลครับ');
+        return;
+      }
       if (confirm('คุณต้องการรีเซ็ตข้อมูลโครงสร้างทั้งหมดกลับเป็นค่าเริ่มต้นหรือไม่?')) {
         masterData = JSON.parse(JSON.stringify(initialMasterData));
         presetItems = [...initialPresetItems];
@@ -984,7 +1026,6 @@
       renderHistory();
     }
 
-    // --- ฟังก์ชันดึงประวัติจาก SheetDB มาแสดงผล ---
     async function renderHistory() {
       const historyList = document.getElementById('history-list');
       historyList.innerHTML = '<div class="text-center text-slate-400 py-4">กำลังโหลดประวัติจากเซิร์ฟเวอร์กลาง...</div>';
