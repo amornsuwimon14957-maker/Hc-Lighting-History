@@ -521,19 +521,16 @@
       };
 
       try {
-        // เช็คว่ามี Config นี้อยู่แล้วหรือยัง
         const checkRes = await fetch(`${API_URL}/search?id=CONFIG_MASTER_DATA`);
         const checkData = await checkRes.json();
 
         if (Array.isArray(checkData) && checkData.length > 0) {
-          // อัปเดตข้อมูลที่มีอยู่แล้ว
           await fetch(`${API_URL}/id/CONFIG_MASTER_DATA`, {
             method: 'PUT',
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
         } else {
-          // สร้างใหม่ถ้ายังไม่มี
           await fetch(API_URL, {
             method: 'POST',
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
@@ -717,7 +714,7 @@
       document.getElementById('step-2-3').classList.toggle('hidden', stepNumber !== 2);
     }
 
-    // --- ฟังก์ชันบันทึกข้อมูลส่งเข้า SheetDB กลาง ---
+    // --- ฟังก์ชันบันทึกข้อมูลส่งเข้า SheetDB กลาง (ค้างอยู่ที่เดิมหลังบันทึก) ---
     async function saveJob(e) {
       e.preventDefault();
 
@@ -768,9 +765,11 @@
         });
 
         alert('บันทึกการเปลี่ยนหลอดไฟเรียบร้อยแล้ว!');
-        document.getElementById('job-form').reset();
-        document.getElementById('technician-name').value = currentUser;
-        goToStep(1);
+        
+        // เคลียร์เฉพาะฟอร์มกรอกรายการและหมายเหตุ แต่ยังคงอยู่ที่หน้าเดิมเพื่อเลือก No. หลอดอื่นต่อได้ทันที
+        document.getElementById('job-note').value = '';
+        resetItemRows();
+        
       } catch (error) {
         console.error(error);
         alert('เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่อีกครั้ง');
@@ -1005,7 +1004,6 @@
         const searchText = document.getElementById('filter-search').value.toLowerCase().trim();
 
         const filtered = history.filter(item => {
-          // ซ่อนแถว Config ระบบไม่ให้เอามาปนกับประวัติการเปลี่ยนหลอดไฟ
           if (item.id === "CONFIG_MASTER_DATA") return false;
 
           if (filterB && item.building !== filterB) return false;
@@ -1025,7 +1023,6 @@
           return;
         }
 
-        // เรียงจากล่าสุดไปเก่าสุด
         filtered.reverse();
 
         historyList.innerHTML = filtered.map(item => `
@@ -1048,7 +1045,6 @@
       }
     }
 
-    // เริ่มต้นโหลดระบบจากเซิร์ฟเวอร์
     loadMasterDataFromServer();
   </script>
 </body>
