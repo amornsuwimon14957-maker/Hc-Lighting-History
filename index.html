@@ -274,7 +274,7 @@
   <div id="admin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col border border-slate-100">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
-        <h3 class="text-lg font-bold text-slate-800">⚙️ จัดการข้อมูลระบบ</h3>
+        <h3 class="text-lg font-bold text-slate-800">⚙️ จัดการข้อมูลระบบ (ซิงค์เซิร์ฟเวอร์กลาง)</h3>
         <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
       
@@ -292,7 +292,7 @@
           <h4 class="font-bold text-slate-700 text-sm">🏢 เพิ่มอาคารใหม่</h4>
           <div class="flex gap-2">
             <input type="text" id="new-building-input" placeholder="ชื่ออาคาร เช่น 13. อาคารคลังสินค้า" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm bg-white">
-            <button onclick="addBuilding()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่ม</button>
+            <button onclick="addBuilding()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่มอาคาร</button>
           </div>
         </div>
 
@@ -328,7 +328,7 @@
       </div>
 
       <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50 rounded-b-2xl">
-        <button onclick="resetMasterData()" class="text-xs text-red-500 hover:underline">รีเซ็ตข้อมูลเป็น 12 อาคารเริ่มต้น</button>
+        <button onclick="resetMasterData()" class="text-xs text-red-500 hover:underline">รีเซ็ตข้อมูลเป็นค่าเริ่มต้น</button>
         <button onclick="toggleAdminModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium">ปิด</button>
       </div>
     </div>
@@ -479,35 +479,85 @@
     let presetItems = [];
     let state = { building: '', room: '', lightNo: '' };
 
-    function loadInitialData() {
+    // --- ฟังก์ชันโหลดข้อมูลโครงสร้างและรายการอุปกรณ์จากเซิร์ฟเวอร์กลาง ---
+    async function loadMasterDataFromServer() {
       checkLoginStatus();
+      try {
+        const res = await fetch(`${API_URL}/search?id=CONFIG_MASTER_DATA`);
+        const data = await res.json();
 
-      const savedMaster = localStorage.getItem('light_master_data_v3');
-      masterData = savedMaster ? JSON.parse(savedMaster) : JSON.parse(JSON.stringify(initialMasterData));
+        if (Array.isArray(data) && data.length > 0 && data[0].items) {
+          // ดึงโครงสร้างจากเซิร์ฟเวอร์กลาง
+          const parsed = JSON.parse(data[0].items);
+          masterData = parsed.masterData || initialMasterData;
+          presetItems = parsed.presetItems || initialPresetItems;
+        } else {
+          // ถ้ายังไม่มีในเซิร์ฟเวอร์ ให้ใช้ค่าเริ่มต้นและบันทึกขึ้นไปครั้งแรก
+          masterData = JSON.parse(JSON.stringify(initialMasterData));
+          presetItems = [...initialPresetItems];
+          await saveMasterDataToServer();
+        }
+      } catch (err) {
+        console.error("โหลดข้อมูลจากเซิร์ฟเวอร์ไม่สำเร็จ ใช้ค่าสำรองในเครื่อง:", err);
+        masterData = JSON.parse(JSON.stringify(initialMasterData));
+        presetItems = [...initialPresetItems];
+      }
 
-      const savedPresets = localStorage.getItem('light_preset_items');
-      presetItems = savedPresets ? JSON.parse(savedPresets) : [...initialPresetItems];
-
-      saveMasterData();
-      savePresetItems();
       renderBuildings();
       updateDatalist();
     }
 
-    function saveMasterData() {
-      localStorage.setItem('light_master_data_v3', JSON.stringify(masterData));
-      renderBuildings();
-    }
+    // --- ฟังก์ชันบันทึกข้อมูลโครงสร้างขึ้นเซิร์ฟเวอร์กลาง (SheetDB) ---
+    async function saveMasterDataToServer() {
+      const payload = {
+        id: "CONFIG_MASTER_DATA",
+        date: new Date().toLocaleString('th-TH'),
+        building: "SYSTEM_CONFIG",
+        room: "CONFIG",
+        lightNo: "ALL",
+        technician: currentUser || "System",
+        items: JSON.stringify({ masterData, presetItems }),
+        note: "System Config Sync"
+      };
 
-    function savePresetItems() {
-      localStorage.setItem('light_preset_items', JSON.stringify(presetItems));
+      try {
+        // เช็คว่ามี Config นี้อยู่แล้วหรือยัง
+        const checkRes = await fetch(`${API_URL}/search?id=CONFIG_MASTER_DATA`);
+        const checkData = await checkRes.json();
+
+        if (Array.isArray(checkData) && checkData.length > 0) {
+          // อัปเดตข้อมูลที่มีอยู่แล้ว
+          await fetch(`${API_URL}/id/CONFIG_MASTER_DATA`, {
+            method: 'PUT',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          // สร้างใหม่ถ้ายังไม่มี
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: [payload] })
+          });
+        }
+      } catch (err) {
+        console.error("บันทึกข้อมูลโครงสร้างไปเซิร์ฟเวอร์ล้มเหลว:", err);
+      }
+
+      renderBuildings();
       updateDatalist();
       renderPresetTags();
     }
 
+    async function savePresetItems() {
+      updateDatalist();
+      renderPresetTags();
+      await saveMasterDataToServer();
+    }
+
     function updateDatalist() {
       const datalist = document.getElementById('preset-items-list');
-      datalist.innerHTML = presetItems.map(item => `<option value="${item}">`).join('');
+      if(datalist) datalist.innerHTML = presetItems.map(item => `<option value="${item}">`).join('');
     }
 
     function renderPresetTags() {
@@ -521,23 +571,23 @@
       `).join('');
     }
 
-    function addPresetItem(itemName) {
+    async function addPresetItem(itemName) {
       const trimmed = itemName.trim();
       if (trimmed && !presetItems.includes(trimmed)) {
         presetItems.push(trimmed);
-        savePresetItems();
+        await savePresetItems();
       }
     }
 
-    function removePresetItem(index) {
+    async function removePresetItem(index) {
       presetItems.splice(index, 1);
-      savePresetItems();
+      await savePresetItems();
     }
 
-    function addPresetItemFromAdmin() {
+    async function addPresetItemFromAdmin() {
       const input = document.getElementById('new-preset-item-input');
       if (input.value.trim()) {
-        addPresetItem(input.value);
+        await addPresetItem(input.value);
         input.value = '';
       }
     }
@@ -574,6 +624,7 @@
 
     function renderBuildings() {
       const listDiv = document.getElementById('building-list');
+      if(!listDiv) return;
       listDiv.innerHTML = '';
       Object.keys(masterData).forEach(bName => {
         const btn = document.createElement('button');
@@ -679,14 +730,14 @@
       const itemRows = document.querySelectorAll('#items-container > div');
       const itemsList = [];
 
-      itemRows.forEach(row => {
+      for (let row of itemRows) {
         const name = row.querySelector('.item-name').value.trim();
         const qty = parseInt(row.querySelector('.item-qty').value) || 1;
         if (name) {
           itemsList.push(`${name} (${qty} ชิ้น)`);
-          addPresetItem(name);
+          await addPresetItem(name);
         }
-      });
+      }
 
       if (itemsList.length === 0) {
         alert('กรุณาระบุรายการอุปกรณ์อย่างน้อย 1 รายการ');
@@ -757,14 +808,16 @@
       const options = '<option value="">-- เลือกอาคาร --</option>' + 
         Object.keys(masterData).map(b => `<option value="${b}">${b}</option>`).join('');
 
-      bSelect1.innerHTML = options;
-      bSelect2.innerHTML = options;
-      document.getElementById('admin-room-select').innerHTML = '<option value="">-- เลือกห้อง --</option>';
+      if(bSelect1) bSelect1.innerHTML = options;
+      if(bSelect2) bSelect2.innerHTML = options;
+      const adminRoomSelect = document.getElementById('admin-room-select');
+      if(adminRoomSelect) adminRoomSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>';
     }
 
     function updateAdminRoomSelect() {
       const bName = document.getElementById('admin-building-select-2').value;
       const rSelect = document.getElementById('admin-room-select');
+      if(!rSelect) return;
       rSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>';
       if (bName && masterData[bName]) {
         Object.keys(masterData[bName]).forEach(r => {
@@ -773,20 +826,21 @@
       }
     }
 
-    function addBuilding() {
+    async function addBuilding() {
       const input = document.getElementById('new-building-input');
       const val = input.value.trim();
       if (!val) return alert('กรุณาระบุชื่ออาคาร');
       if (masterData[val]) return alert('มีอาคารนี้อยู่แล้ว');
 
       masterData[val] = {};
-      saveMasterData();
+      await saveMasterDataToServer();
       input.value = '';
       populateAdminDropdowns();
       renderDataTree();
+      alert('เพิ่มอาคารสำเร็จ และซิงค์ขึ้นเซิร์ฟเวอร์กลางแล้ว!');
     }
 
-    function addRoom() {
+    async function addRoom() {
       const bName = document.getElementById('admin-building-select').value;
       const input = document.getElementById('new-room-input');
       const rName = input.value.trim();
@@ -796,13 +850,14 @@
       if (masterData[bName][rName]) return alert('มีห้องนี้อยู่แล้วในอาคาร');
 
       masterData[bName][rName] = [];
-      saveMasterData();
+      await saveMasterDataToServer();
       input.value = '';
       populateAdminDropdowns();
       renderDataTree();
+      alert('เพิ่มห้องสำเร็จ และซิงค์ขึ้นเซิร์ฟเวอร์กลางแล้ว!');
     }
 
-    function addLightNo() {
+    async function addLightNo() {
       const bName = document.getElementById('admin-building-select-2').value;
       const rName = document.getElementById('admin-room-select').value;
       const input = document.getElementById('new-light-input');
@@ -813,24 +868,27 @@
       if (masterData[bName][rName].includes(lNo)) return alert('มี No. หลอดไฟนี้อยู่แล้ว');
 
       masterData[bName][rName].push(lNo);
-      saveMasterData();
+      await saveMasterDataToServer();
       input.value = '';
       renderDataTree();
+      alert('เพิ่ม No. หลอดไฟสำเร็จ และซิงค์ขึ้นเซิร์ฟเวอร์กลางแล้ว!');
     }
 
-    function deleteItem(bName, rName = null, lNo = null) {
+    async function deleteItem(bName, rName = null, lNo = null) {
       if (!confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) return;
       if (lNo) masterData[bName][rName] = masterData[bName][rName].filter(item => item !== lNo);
       else if (rName) delete masterData[bName][rName];
       else delete masterData[bName];
 
-      saveMasterData();
+      await saveMasterDataToServer();
       populateAdminDropdowns();
       renderDataTree();
+      alert('ลบรายการสำเร็จ และอัปเดตเซิร์ฟเวอร์กลางแล้ว!');
     }
 
     function renderDataTree() {
       const container = document.getElementById('master-data-tree');
+      if(!container) return;
       container.innerHTML = '';
       if (Object.keys(masterData).length === 0) {
         container.innerHTML = '<div class="text-slate-400">ยังไม่มีข้อมูล</div>';
@@ -865,14 +923,14 @@
       });
     }
 
-    function resetMasterData() {
-      if (confirm('คุณต้องการคืนค่าข้อมูลเป็น 12 อาคารเริ่มต้นหรือไม่?')) {
+    async function resetMasterData() {
+      if (confirm('คุณต้องการรีเซ็ตข้อมูลโครงสร้างทั้งหมดกลับเป็นค่าเริ่มต้นหรือไม่?')) {
         masterData = JSON.parse(JSON.stringify(initialMasterData));
         presetItems = [...initialPresetItems];
-        saveMasterData();
-        savePresetItems();
+        await saveMasterDataToServer();
         populateAdminDropdowns();
         renderDataTree();
+        alert('รีเซ็ตข้อมูลเรียบร้อยแล้ว');
       }
     }
 
@@ -947,6 +1005,9 @@
         const searchText = document.getElementById('filter-search').value.toLowerCase().trim();
 
         const filtered = history.filter(item => {
+          // ซ่อนแถว Config ระบบไม่ให้เอามาปนกับประวัติการเปลี่ยนหลอดไฟ
+          if (item.id === "CONFIG_MASTER_DATA") return false;
+
           if (filterB && item.building !== filterB) return false;
           if (filterR && item.room !== filterR) return false;
           if (filterL && item.lightNo !== filterL) return false;
@@ -987,7 +1048,8 @@
       }
     }
 
-    loadInitialData();
+    // เริ่มต้นโหลดระบบจากเซิร์ฟเวอร์
+    loadMasterDataFromServer();
   </script>
 </body>
 </html>
