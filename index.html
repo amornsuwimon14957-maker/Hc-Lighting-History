@@ -250,6 +250,18 @@
             <input type="text" id="job-note" placeholder="เช่น บัลลาสต์มีเสียงดัง, เปลี่ยนแทนของเดิมที่เสื่อมสภาพ" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
           </div>
 
+          <!-- เพิ่มระบบแนบรูปภาพประกอบ -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">📷 แนบรูปภาพหน้างาน / หลอดไฟที่เปลี่ยน (ใส่หรือไม่ใส่ก็ได้)</label>
+            <input type="file" id="job-image-file" accept="image/*" onchange="handleImagePreview(event)" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+            
+            <!-- ส่วนแสดงตัวอย่างรูปภาพ -->
+            <div id="image-preview-container" class="hidden mt-3 relative inline-block">
+              <img id="image-preview-tag" src="" alt="Preview" class="h-28 rounded-lg border border-slate-300 shadow-sm object-cover">
+              <button type="button" onclick="clearJobImage()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-600">&times;</button>
+            </div>
+          </div>
+
           <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-sm transition flex justify-center items-center gap-2">
             ✅ บันทึกปิดงาน (ส่งเข้าเซิร์ฟเวอร์กลาง)
           </button>
@@ -394,6 +406,7 @@
     };
 
     let currentUser = null;
+    let currentJobImageBase64 = ""; // ตัวเก็บข้อมูลรูปภาพที่เลือก
 
     function checkLoginStatus() {
       const savedUser = localStorage.getItem('logged_in_user');
@@ -433,6 +446,55 @@
         localStorage.removeItem('logged_in_user');
         checkLoginStatus();
       }
+    }
+
+    // ฟังก์ชันจัดการรูปภาพที่อัปโหลด (บีบอัดและแปลงเป็น Base64 เพื่อความเสถียร)
+    function handleImagePreview(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // กำหนดขนาดสูงสุดไม่ให้รูปใหญ่เกินไป (ป้องกันข้อมูลล้นระบบ SheetDB)
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          currentJobImageBase64 = canvas.toDataURL('image/jpeg', 0.7); // คุณภาพ 70% เหมาะสำหรับเก็บใน Database
+
+          document.getElementById('image-preview-tag').src = currentJobImageBase64;
+          document.getElementById('image-preview-container').classList.remove('hidden');
+        }
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearJobImage() {
+      currentJobImageBase64 = "";
+      document.getElementById('job-image-file').value = "";
+      document.getElementById('image-preview-container').classList.add('hidden');
     }
 
     const initialMasterData = {
@@ -517,7 +579,8 @@
         lightNo: "ALL",
         technician: currentUser || "System",
         items: JSON.stringify({ masterData, presetItems }),
-        note: "System Config Sync"
+        note: "System Config Sync",
+        image: ""
       };
 
       try {
@@ -626,6 +689,7 @@
     function resetItemRows() {
       document.getElementById('items-container').innerHTML = '';
       addItemRow();
+      clearJobImage();
     }
 
     function renderBuildings() {
@@ -757,7 +821,8 @@
         lightNo: state.lightNo,
         technician: currentUser,
         items: itemsList.join(', '),
-        note: document.getElementById('job-note').value || '-'
+        note: document.getElementById('job-note').value || '-',
+        image: currentJobImageBase64 || ''
       };
 
       try {
@@ -1067,13 +1132,20 @@
         filtered.reverse();
 
         historyList.innerHTML = filtered.map(item => `
-          <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1 text-sm hover:border-indigo-300 transition">
+          <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2 text-sm hover:border-indigo-300 transition">
             <div class="flex justify-between items-start text-indigo-600 font-semibold">
               <span>${item.building || '-'} > ${item.room || '-'} [${item.lightNo || '-'}]</span>
               <span class="text-xs text-slate-400 font-normal">${item.date || '-'}</span>
             </div>
             <div class="text-slate-800 font-medium">🔧 อุปกรณ์ที่เปลี่ยน: ${item.items || '-'}</div>
-            <div class="text-slate-500 text-xs flex justify-between">
+            
+            ${item.image && item.image.length > 10 ? `
+              <div class="mt-2">
+                <img src="${item.image}" alt="รูปหน้างาน" onclick="openImageModal('${item.image}')" class="w-20 h-20 object-cover rounded-lg border border-slate-300 cursor-pointer hover:opacity-90 shadow-sm" title="คลิกเพื่อขยายดูรูปภาพ">
+              </div>
+            ` : ''}
+
+            <div class="text-slate-500 text-xs flex justify-between items-center pt-1 border-t border-slate-200">
               <span>ผู้เปลี่ยน: ${item.technician || '-'}</span>
               ${item.note && item.note !== '-' ? `<span class="italic text-slate-400">หมายเหตุ: ${item.note}</span>` : ''}
             </div>
