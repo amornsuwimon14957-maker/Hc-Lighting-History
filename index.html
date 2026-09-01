@@ -368,7 +368,7 @@
     </div>
   </div>
 
-  <!-- Modal: แสดงประวัติย้อนหลัง -->
+  <!-- Modal: แสดงประวัติย้อนหลัง (ปรับปรุงใหม่ มีปุ่มยืนยันและซ่อนข้อมูลก่อนกด) -->
   <div id="history-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col border border-slate-100">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
@@ -376,8 +376,9 @@
         <button onclick="toggleHistoryModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
 
-      <div class="p-4 bg-slate-50 border-b border-slate-200 space-y-2">
-        <div class="text-xs font-bold text-slate-600">🔍 กรองข้อมูลประวัติ</div>
+      <div class="p-4 bg-slate-50 border-b border-slate-200 space-y-3">
+        <div class="text-xs font-bold text-slate-600">🔍 ค้นหาและกรองข้อมูลประวัติ</div>
+        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
           <select id="filter-building" onchange="onFilterBuildingChange()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
             <option value="">🏢 ทุกอาคาร</option>
@@ -385,18 +386,27 @@
           <select id="filter-room" onchange="onFilterRoomChange()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
             <option value="">🚪 ทุกห้อง</option>
           </select>
-          <select id="filter-light-no" onchange="renderHistory()" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+          <select id="filter-light-no" class="p-2 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
             <option value="">💡 ทุก No. หลอดไฟ</option>
           </select>
         </div>
 
-        <div>
-          <input type="text" id="filter-search" oninput="renderHistory()" placeholder="🔎 ค้นหาด้วยคำ เช่น ชื่อช่าง, ชื่ออะไหล่..." class="w-full p-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+        <div class="flex gap-2">
+          <input type="text" id="filter-search" placeholder="🔎 คำค้นหาเพิ่มเติม เช่น ชื่อช่าง, ชื่ออะไหล่..." class="flex-1 p-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+          <!-- ปุ่มยืนยันเพื่อดูประวัติ -->
+          <button onclick="renderHistory()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2 rounded-lg text-xs shadow transition flex items-center gap-1.5 whitespace-nowrap">
+            ✅ ยืนยันเพื่อดูประวัติ
+          </button>
         </div>
       </div>
       
+      <!-- พื้นที่แสดงประวัติ (ซ่อนไว้ก่อนจนกว่าจะกดปุ่มยืนยัน) -->
       <div class="p-4 overflow-y-auto space-y-3 flex-1" id="history-list">
-        <div class="text-center text-slate-400 py-4">กำลังโหลดประวัติจากเซิร์ฟเวอร์กลาง...</div>
+        <div class="text-center text-slate-400 py-12">
+          <div class="text-3xl mb-2">💡</div>
+          <div class="text-sm font-semibold">กรุณากดปุ่ม "ยืนยันเพื่อดูประวัติ" ด้านบน</div>
+          <div class="text-xs text-slate-400 mt-1">เพื่อกรองและแสดงข้อมูลประวัติการเปลี่ยนหลอดไฟที่คุณต้องการ</div>
+        </div>
       </div>
 
       <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50 rounded-b-2xl">
@@ -599,7 +609,6 @@
     let presetItems = [];
     let state = { building: '', room: '', lightNo: '' };
 
-    // โหลดข้อมูลจากเซิร์ฟเวอร์แบบถาวร (ไม่เขียนทับหากมีข้อมูลอยู่แล้ว)
     async function loadMasterDataFromServer() {
       checkLoginStatus();
       try {
@@ -611,7 +620,6 @@
           masterData = parsed.masterData || initialMasterData;
           presetItems = parsed.presetItems || initialPresetItems;
         } else {
-          // หากไม่มีข้อมูลในเซิร์ฟเวอร์เลยจริงๆ ถึงจะบันทึกค่าตั้งต้นครั้งแรกสุด
           masterData = JSON.parse(JSON.stringify(initialMasterData));
           presetItems = [...initialPresetItems];
           if (!isVisitor) {
@@ -1116,7 +1124,14 @@
       const isHidden = modal.classList.contains('hidden');
       if (isHidden) {
         setupHistoryFilterDropdowns();
-        renderHistory();
+        // รีเซ็ตหน้าต่างประวัติให้กลับไปสถานะรอการกดปุ่มยืนยัน
+        document.getElementById('history-list').innerHTML = `
+          <div class="text-center text-slate-400 py-12">
+            <div class="text-3xl mb-2">💡</div>
+            <div class="text-sm font-semibold">กรุณากดปุ่ม "ยืนยันเพื่อดูประวัติ" ด้านบน</div>
+            <div class="text-xs text-slate-400 mt-1">เพื่อกรองและแสดงข้อมูลประวัติการเปลี่ยนหลอดไฟที่คุณต้องการ</div>
+          </div>
+        `;
         modal.classList.remove('hidden');
       } else {
         modal.classList.add('hidden');
@@ -1158,13 +1173,11 @@
           lFilter.innerHTML += `<option value="${l}">${l}</option>`;
         });
       }
-
-      renderHistory();
     }
 
     async function renderHistory() {
       const historyList = document.getElementById('history-list');
-      historyList.innerHTML = '<div class="text-center text-slate-400 py-4">กำลังโหลดประวัติจากเซิร์ฟเวอร์กลาง...</div>';
+      historyList.innerHTML = '<div class="text-center text-slate-400 py-8">กำลังโหลดประวัติจากเซิร์ฟเวอร์กลาง...</div>';
 
       try {
         const response = await fetch(API_URL);
