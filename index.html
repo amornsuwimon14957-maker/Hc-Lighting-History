@@ -53,7 +53,7 @@
       <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">👤 เลือกชื่อผู้ใช้งาน / ช่างผู้ซ่อม</label>
-          <select id="login-user-select" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-800">
+          <select id="login-user-select" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-800">
             <option value="">-- เลือกชื่อผู้ใช้งาน --</option>
             <option value="อมร อมรกุล">อมร อมรกุล</option>
             <option value="ปัญณวัฒน์ แสงนาค">ปัญณวัฒน์ แสงนาค</option>
@@ -72,7 +72,6 @@
           <input 
             type="password" 
             id="login-password-input" 
-            required 
             placeholder="กรอกรหัสพนักงาน" 
             maxlength="10"
             class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none tracking-widest bg-white"
@@ -84,9 +83,19 @@
         </div>
 
         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold py-2.5 rounded-lg shadow transition text-sm">
-          เข้าสู่ระบบ 🔑
+          เข้าสู่ระบบช่าง 🔑
         </button>
       </form>
+
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-slate-200"></div>
+        <span class="flex-shrink mx-4 text-slate-400 text-xs">หรือ</span>
+        <div class="flex-grow border-t border-slate-200"></div>
+      </div>
+
+      <button onclick="handleVisitorLogin()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-lg shadow-sm transition text-sm flex items-center justify-center gap-2 border border-slate-300">
+        👀 เข้าชมประวัติทั่วไป (Visitor)
+      </button>
 
       <div class="text-center pt-2 border-t border-slate-100 text-[10px] text-slate-400">
         By Amorn Amornkul | ฝ่ายซ่อมบำรุงเครื่องกลและไฟฟ้า
@@ -135,7 +144,7 @@
         </div>
 
         <div class="flex gap-1.5">
-          <button onclick="toggleAdminModal()" class="bg-indigo-800 hover:bg-indigo-900 px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-sm">
+          <button id="btn-admin-manage" onclick="toggleAdminModal()" class="bg-indigo-800 hover:bg-indigo-900 px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-sm">
             ⚙️ จัดการ
           </button>
           <button onclick="toggleHistoryModal()" class="bg-indigo-700 hover:bg-indigo-800 px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 shadow-sm">
@@ -195,7 +204,7 @@
     <!-- STEP 2 & 3 COMBINED: เลือกห้อง + ฟอร์มระบุรายการในหน้าเดียวกัน -->
     <section id="step-2-3" class="hidden space-y-4">
       <div class="flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-white drop-shadow">เลือกห้องและจุดที่ต้องการแจ้งเปลี่ยน</h2>
+        <h2 id="section-title-mode" class="text-lg font-semibold text-white drop-shadow">เลือกห้องและจุดที่ต้องการแจ้งเปลี่ยน</h2>
         <button onclick="goToStep(1)" class="text-sm text-indigo-200 hover:text-white underline">← ย้อนกลับเลือกอาคาร</button>
       </div>
 
@@ -406,19 +415,30 @@
     };
 
     let currentUser = null;
-    let currentJobImageBase64 = ""; // ตัวเก็บข้อมูลรูปภาพที่เลือก
+    let isVisitor = false;
+    let currentJobImageBase64 = "";
 
     function checkLoginStatus() {
       const savedUser = localStorage.getItem('logged_in_user');
+      const savedVisitor = localStorage.getItem('is_visitor');
       const loginModal = document.getElementById('login-modal');
       
-      if (savedUser && usersDatabase[savedUser]) {
+      if (savedVisitor === 'true') {
+        currentUser = "Visitor (บุคคลทั่วไป)";
+        isVisitor = true;
+        document.getElementById('current-user-display').innerText = `👀 Visitor`;
+        loginModal.classList.add('hidden');
+        applyVisitorUIRestrictions();
+      } else if (savedUser && usersDatabase[savedUser]) {
         currentUser = savedUser;
+        isVisitor = false;
         document.getElementById('current-user-display').innerText = `👤 ${currentUser}`;
         document.getElementById('technician-name').value = currentUser;
         loginModal.classList.add('hidden');
+        applyVisitorUIRestrictions();
       } else {
         currentUser = null;
+        isVisitor = false;
         loginModal.classList.remove('hidden');
       }
     }
@@ -433,6 +453,7 @@
 
       if (usersDatabase[selectedUser] === inputPass) {
         localStorage.setItem('logged_in_user', selectedUser);
+        localStorage.removeItem('is_visitor');
         errorMsg.classList.add('hidden');
         document.getElementById('login-password-input').value = '';
         checkLoginStatus();
@@ -441,9 +462,29 @@
       }
     }
 
+    function handleVisitorLogin() {
+      localStorage.setItem('is_visitor', 'true');
+      localStorage.removeItem('logged_in_user');
+      checkLoginStatus();
+    }
+
+    function applyVisitorUIRestrictions() {
+      const adminBtn = document.getElementById('btn-admin-manage');
+      const sectionTitle = document.getElementById('section-title-mode');
+
+      if (isVisitor) {
+        if (adminBtn) adminBtn.classList.add('hidden');
+        if (sectionTitle) sectionTitle.innerText = "เลือกห้องและจุดเพื่อตรวจสอบข้อมูล (Visitor Mode)";
+      } else {
+        if (adminBtn) adminBtn.classList.remove('hidden');
+        if (sectionTitle) sectionTitle.innerText = "เลือกห้องและจุดที่ต้องการแจ้งเปลี่ยน";
+      }
+    }
+
     function handleLogout() {
       if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
         localStorage.removeItem('logged_in_user');
+        localStorage.removeItem('is_visitor');
         checkLoginStatus();
       }
     }
@@ -461,7 +502,6 @@
           let width = img.width;
           let height = img.height;
           
-          // กำหนดขนาดสูงสุดไม่ให้รูปใหญ่เกินไป (ป้องกันข้อมูลล้นระบบ SheetDB)
           const MAX_WIDTH = 800;
           const MAX_HEIGHT = 800;
           if (width > height) {
@@ -481,7 +521,7 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
           
-          currentJobImageBase64 = canvas.toDataURL('image/jpeg', 0.7); // คุณภาพ 70% เหมาะสำหรับเก็บใน Database
+          currentJobImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
 
           document.getElementById('image-preview-tag').src = currentJobImageBase64;
           document.getElementById('image-preview-container').classList.remove('hidden');
@@ -558,7 +598,9 @@
         } else {
           masterData = JSON.parse(JSON.stringify(initialMasterData));
           presetItems = [...initialPresetItems];
-          await saveMasterDataToServer();
+          if (!isVisitor) {
+            await saveMasterDataToServer();
+          }
         }
       } catch (err) {
         console.error("โหลดข้อมูลจากเซิร์ฟเวอร์ไม่สำเร็จ ใช้ค่าสำรองในเครื่อง:", err);
@@ -571,6 +613,7 @@
     }
 
     async function saveMasterDataToServer() {
+      if (isVisitor) return;
       const payload = {
         id: "CONFIG_MASTER_DATA",
         date: new Date().toLocaleString('th-TH'),
@@ -634,6 +677,7 @@
     }
 
     async function addPresetItem(itemName) {
+      if (isVisitor) return;
       const trimmed = itemName.trim();
       if (trimmed && !presetItems.includes(trimmed)) {
         presetItems.push(trimmed);
@@ -767,9 +811,23 @@
         document.getElementById('bc-room-name').innerText = `${state.room} (${state.lightNo})`;
         document.getElementById('bc-room').classList.remove('hidden');
         
-        resetItemRows();
-        formContainer.classList.remove('hidden');
-        formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (isVisitor) {
+          // ถ้าเป็น Visitor ให้เปิดหน้าต่างกรองประวัติไปที่จุดนี้ทันทีเพื่ออำนวยความสะดวกในการดูประวัติของจุดนั้นๆ
+          toggleHistoryModal();
+          setTimeout(() => {
+            document.getElementById('filter-building').value = state.building;
+            onFilterBuildingChange();
+            document.getElementById('filter-room').value = state.room;
+            onFilterRoomChange();
+            document.getElementById('filter-light-no').value = state.lightNo;
+            renderHistory();
+          }, 100);
+          formContainer.classList.add('hidden');
+        } else {
+          resetItemRows();
+          formContainer.classList.remove('hidden');
+          formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       } else {
         formContainer.classList.add('hidden');
         document.getElementById('bc-room').classList.add('hidden');
@@ -789,6 +847,10 @@
 
     async function saveJob(e) {
       e.preventDefault();
+      if (isVisitor) {
+        alert('Visitor สามารถเข้าชมข้อมูลได้เท่านั้น ไม่สามารถบันทึกข้อมูลได้ครับ');
+        return;
+      }
 
       if (!currentUser) {
         alert('กรุณาเข้าสู่ระบบก่อนทำการบันทึกข้อมูล');
@@ -861,6 +923,10 @@
     }
 
     function toggleAdminModal() {
+      if (isVisitor) {
+        alert('Visitor ไม่สามารถเข้าถึงเมนูจัดการระบบได้ครับ');
+        return;
+      }
       const modal = document.getElementById('admin-modal');
       const isHidden = modal.classList.contains('hidden');
       if (isHidden) {
@@ -916,6 +982,7 @@
     }
 
     async function addBuilding() {
+      if (isVisitor) return;
       const input = document.getElementById('new-building-input');
       const val = input.value.trim();
       if (!val) return alert('กรุณาระบุชื่ออาคาร');
@@ -930,6 +997,7 @@
     }
 
     async function addRoom() {
+      if (isVisitor) return;
       const bName = document.getElementById('admin-building-select').value;
       const input = document.getElementById('new-room-input');
       const rName = input.value.trim();
@@ -947,6 +1015,7 @@
     }
 
     async function addLightNo() {
+      if (isVisitor) return;
       const bName = document.getElementById('admin-building-select-2').value;
       const rName = document.getElementById('admin-room-select').value;
       const input = document.getElementById('new-light-input');
