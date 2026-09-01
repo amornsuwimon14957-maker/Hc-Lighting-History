@@ -120,8 +120,8 @@
           >
           <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs text-white">🔍</div>
         </div>
-        <div class="cursor-pointer" onclick="goToStep(1)">
-          <h1 class="text-xl font-bold leading-tight hover:text-indigo-100 transition-colors">
+        <div>
+          <h1 class="text-xl font-bold leading-tight">
             ระบบบันทึกการเปลี่ยนหลอดไฟ
           </h1>
           <p class="text-[10px] text-indigo-200 tracking-wide font-normal">LIGHTING MAINTENANCE SYSTEM</p>
@@ -163,14 +163,14 @@
   <!-- ==================== MAIN CONTENT ==================== -->
   <main class="max-w-4xl mx-auto px-4 mt-6">
     
-    <!-- Navigation Breadcrumb -->
+    <!-- Navigation Breadcrumb (ซ่อนสำหรับ Visitor) -->
     <nav id="breadcrumb" class="text-sm font-medium text-white/90 bg-slate-900/40 backdrop-blur-sm px-3 py-2 rounded-lg mb-4 flex items-center gap-2 border border-white/10 shadow-sm">
       <span class="cursor-pointer hover:text-indigo-300" onclick="goToStep(1)">เลือกอาคาร</span>
       <span id="bc-building" class="hidden">/ <span class="cursor-pointer hover:text-indigo-300" onclick="goToStep(2)" id="bc-building-name"></span></span>
       <span id="bc-room" class="hidden">/ <span id="bc-room-name" class="text-indigo-200 font-semibold"></span></span>
     </nav>
 
-    <!-- STEP 1: เลือกอาคาร -->
+    <!-- STEP 1: เลือกอาคาร (แสดงเฉพาะช่าง / Visitor จะถูกซ่อน) -->
     <section id="step-1" class="space-y-6">
       <div class="bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/20">
         <h3 class="text-md font-semibold text-slate-700 mb-3 flex items-center gap-2">
@@ -195,7 +195,7 @@
         <p class="text-xs text-slate-400 text-center mt-2">* คลิกที่รูปเพื่อเปิดดูแผนผังขยายใหญ่</p>
       </div>
 
-      <div>
+      <div id="building-selection-section">
         <h2 class="text-lg font-semibold text-white drop-shadow mb-3">เลือกอาคารที่ต้องการดำเนินงาน</h2>
         <div id="building-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
       </div>
@@ -278,6 +278,15 @@
       </div>
 
     </section>
+
+    <!-- ==================== VISITOR DIRECT VIEW ==================== -->
+    <div id="visitor-quick-panel" class="hidden bg-white/95 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20 text-center space-y-4">
+      <div class="text-indigo-600 font-bold text-lg">💡 โหมดผู้เข้าชม (Visitor)</div>
+      <p class="text-xs text-slate-500 max-w-md mx-auto">ท่านสามารถตรวจสอบแผนผังภายในบริษัทด้านบน หรือคลิกปุ่มด้านล่างเพื่อเปิดดูประวัติการเปลี่ยนหลอดไฟย้อนหลังได้ทันที</p>
+      <button onclick="toggleHistoryModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow transition text-sm flex items-center justify-center gap-2 mx-auto">
+        📜 เปิดดูประวัติการเปลี่ยนหลอดไฟย้อนหลัง
+      </button>
+    </div>
 
   </main>
 
@@ -470,14 +479,20 @@
 
     function applyVisitorUIRestrictions() {
       const adminBtn = document.getElementById('btn-admin-manage');
-      const sectionTitle = document.getElementById('section-title-mode');
+      const buildingSelectionSection = document.getElementById('building-selection-section');
+      const visitorQuickPanel = document.getElementById('visitor-quick-panel');
+      const breadcrumb = document.getElementById('breadcrumb');
 
       if (isVisitor) {
         if (adminBtn) adminBtn.classList.add('hidden');
-        if (sectionTitle) sectionTitle.innerText = "เลือกห้องและจุดเพื่อตรวจสอบข้อมูล (Visitor Mode)";
+        if (buildingSelectionSection) buildingSelectionSection.classList.add('hidden'); // ซ่อนปุ่มเลือกอาคาร
+        if (visitorQuickPanel) visitorQuickPanel.classList.remove('hidden'); // แสดงปุ่มเปิดดูประวัติ
+        if (breadcrumb) breadcrumb.classList.add('hidden');
       } else {
         if (adminBtn) adminBtn.classList.remove('hidden');
-        if (sectionTitle) sectionTitle.innerText = "เลือกห้องและจุดที่ต้องการแจ้งเปลี่ยน";
+        if (buildingSelectionSection) buildingSelectionSection.classList.remove('hidden');
+        if (visitorQuickPanel) visitorQuickPanel.classList.add('hidden');
+        if (breadcrumb) breadcrumb.classList.remove('hidden');
       }
     }
 
@@ -811,23 +826,9 @@
         document.getElementById('bc-room-name').innerText = `${state.room} (${state.lightNo})`;
         document.getElementById('bc-room').classList.remove('hidden');
         
-        if (isVisitor) {
-          // ถ้าเป็น Visitor ให้เปิดหน้าต่างกรองประวัติไปที่จุดนี้ทันทีเพื่ออำนวยความสะดวกในการดูประวัติของจุดนั้นๆ
-          toggleHistoryModal();
-          setTimeout(() => {
-            document.getElementById('filter-building').value = state.building;
-            onFilterBuildingChange();
-            document.getElementById('filter-room').value = state.room;
-            onFilterRoomChange();
-            document.getElementById('filter-light-no').value = state.lightNo;
-            renderHistory();
-          }, 100);
-          formContainer.classList.add('hidden');
-        } else {
-          resetItemRows();
-          formContainer.classList.remove('hidden');
-          formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        resetItemRows();
+        formContainer.classList.remove('hidden');
+        formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } else {
         formContainer.classList.add('hidden');
         document.getElementById('bc-room').classList.add('hidden');
