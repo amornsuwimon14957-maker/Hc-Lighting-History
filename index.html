@@ -47,7 +47,6 @@
           <img src="https://i.postimg.cc/jj4MQZWK/Designing-HC-Lighting-Maintenanc-2K-202608232235.jpg" alt="Logo" class="w-full h-full object-cover rounded-lg">
         </div>
         <h2 class="text-xl font-bold text-slate-800">เข้าสู่ระบบ (Login)</h2>
-        <!-- เพิ่มชื่อบริษัทที่นี่ -->
         <div class="text-xs font-semibold text-indigo-700">บริษัทไฮกรีตโปรดักส์ แอนด์ เทคโนโลยี่ จํากัด</div>
         <p class="text-[11px] text-slate-500">ระบบบันทึกประวัติการเปลี่ยนหลอดไฟ</p>
       </div>
@@ -165,14 +164,14 @@
   <!-- ==================== MAIN CONTENT ==================== -->
   <main class="max-w-4xl mx-auto px-4 mt-6">
     
-    <!-- Navigation Breadcrumb (ซ่อนสำหรับ Visitor) -->
+    <!-- Navigation Breadcrumb -->
     <nav id="breadcrumb" class="text-sm font-medium text-white/90 bg-slate-900/40 backdrop-blur-sm px-3 py-2 rounded-lg mb-4 flex items-center gap-2 border border-white/10 shadow-sm">
       <span class="cursor-pointer hover:text-indigo-300" onclick="goToStep(1)">เลือกอาคาร</span>
       <span id="bc-building" class="hidden">/ <span class="cursor-pointer hover:text-indigo-300" onclick="goToStep(2)" id="bc-building-name"></span></span>
       <span id="bc-room" class="hidden">/ <span id="bc-room-name" class="text-indigo-200 font-semibold"></span></span>
     </nav>
 
-    <!-- STEP 1: เลือกอาคาร (แสดงเฉพาะช่าง / Visitor จะถูกซ่อน) -->
+    <!-- STEP 1: เลือกอาคาร -->
     <section id="step-1" class="space-y-6">
       <div class="bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/20">
         <h3 class="text-md font-semibold text-slate-700 mb-3 flex items-center gap-2">
@@ -203,14 +202,13 @@
       </div>
     </section>
 
-    <!-- STEP 2 & 3 COMBINED: เลือกห้อง + ฟอร์มระบุรายการในหน้าเดียวกัน -->
+    <!-- STEP 2 & 3 COMBINED -->
     <section id="step-2-3" class="hidden space-y-4">
       <div class="flex justify-between items-center">
         <h2 id="section-title-mode" class="text-lg font-semibold text-white drop-shadow">เลือกห้องและจุดที่ต้องการแจ้งเปลี่ยน</h2>
         <button onclick="goToStep(1)" class="text-sm text-indigo-200 hover:text-white underline">← ย้อนกลับเลือกอาคาร</button>
       </div>
 
-      <!-- ส่วนที่ 1: เลือกห้องและ No. หลอดไฟ -->
       <div class="bg-white/95 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20 space-y-4">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">ห้อง / พื้นที่</label>
@@ -227,7 +225,6 @@
         </div>
       </div>
 
-      <!-- ส่วนที่ 2: ฟอร์มระบุรายละเอียดและบันทึกปิดงาน -->
       <div id="job-form-container" class="hidden transition-all duration-300">
         <form id="job-form" onsubmit="saveJob(event)" class="bg-white/95 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20 space-y-5">
           <div class="border-b border-slate-200 pb-3 mb-2">
@@ -242,7 +239,6 @@
             <input type="text" id="technician-name" required readonly class="w-full p-2.5 border border-slate-200 bg-slate-100 rounded-lg text-slate-600 font-semibold cursor-not-allowed">
           </div>
 
-          <!-- Dynamic Items Section -->
           <div>
             <div class="flex justify-between items-center mb-2">
               <label class="block text-sm font-medium text-slate-700">รายการอุปกรณ์ที่เปลี่ยน</label>
@@ -261,12 +257,10 @@
             <input type="text" id="job-note" placeholder="เช่น บัลลาสต์มีเสียงดัง, เปลี่ยนแทนของเดิมที่เสื่อมสภาพ" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
           </div>
 
-          <!-- เพิ่มระบบแนบรูปภาพประกอบ -->
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">📷 แนบรูปภาพหน้างาน / หลอดไฟที่เปลี่ยน (ใส่หรือไม่ใส่ก็ได้)</label>
             <input type="file" id="job-image-file" accept="image/*" onchange="handleImagePreview(event)" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
             
-            <!-- ส่วนแสดงตัวอย่างรูปภาพ -->
             <div id="image-preview-container" class="hidden mt-3 relative inline-block">
               <img id="image-preview-tag" src="" alt="Preview" class="h-28 rounded-lg border border-slate-300 shadow-sm object-cover">
               <button type="button" onclick="clearJobImage()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-600">&times;</button>
@@ -281,7 +275,7 @@
 
     </section>
 
-    <!-- ==================== VISITOR DIRECT VIEW ==================== -->
+    <!-- VISITOR DIRECT VIEW -->
     <div id="visitor-quick-panel" class="hidden bg-white/95 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20 text-center space-y-4">
       <div class="text-indigo-600 font-bold text-lg">💡 โหมดผู้เข้าชม (Visitor)</div>
       <p class="text-xs text-slate-500 max-w-md mx-auto">ท่านสามารถตรวจสอบแผนผังภายในบริษัทด้านบน หรือคลิกปุ่มด้านล่างเพื่อเปิดดูประวัติการเปลี่ยนหลอดไฟย้อนหลังได้ทันที</p>
@@ -370,7 +364,7 @@
     </div>
   </div>
 
-  <!-- Modal: แสดงประวัติย้อนหลัง (ปรับปรุงใหม่ มีปุ่มยืนยันและซ่อนข้อมูลก่อนกด) -->
+  <!-- Modal: แสดงประวัติย้อนหลัง -->
   <div id="history-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col border border-slate-100">
       <div class="p-4 border-b border-slate-200 flex justify-between items-center">
@@ -395,14 +389,12 @@
 
         <div class="flex gap-2">
           <input type="text" id="filter-search" placeholder="🔎 คำค้นหาเพิ่มเติม เช่น ชื่อช่าง, ชื่ออะไหล่..." class="flex-1 p-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
-          <!-- ปุ่มยืนยันเพื่อดูประวัติ -->
           <button onclick="renderHistory()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2 rounded-lg text-xs shadow transition flex items-center gap-1.5 whitespace-nowrap">
             ✅ ยืนยันเพื่อดูประวัติ
           </button>
         </div>
       </div>
       
-      <!-- พื้นที่แสดงประวัติ (ซ่อนไว้ก่อนจนกว่าจะกดปุ่มยืนยัน) -->
       <div class="p-4 overflow-y-auto space-y-3 flex-1" id="history-list">
         <div class="text-center text-slate-400 py-12">
           <div class="text-3xl mb-2">💡</div>
@@ -565,8 +557,27 @@
 
     const initialMasterData = {
       "1. อาคารสำนักงานใหญ่": {
-        "ห้องประชุมใหญ่": ["L-01", "L-02", "L-03"],
-        "ห้องผู้บริหาร": ["L-01", "L-02"]
+        "ห้องกรรมการผู้จัดการ": ["L-01", "L-02", "L-03"],
+        "ห้องเลขานุการ": ["L-01", "L-02"],
+        "ห้องที่ปรึกษา 1": ["L-01", "L-02"],
+        "ห้องที่ปรึกษา 2": ["L-01", "L-02"],
+        "ห้องที่ปรึกษากรรมการผู้จัดการ": ["L-01", "L-02"],
+        "ห้องผู้ช่วยกรรมการผู้จัดการ": ["L-01", "L-02"],
+        "ห้องวิศวกรรม": ["L-01", "L-02", "L-03"],
+        "ห้องพัฒนาธุรกิจ": ["L-01", "L-02"],
+        "ห้องประชุมภาชี": ["L-01", "L-02", "L-03"],
+        "ห้องประชุมบางเคียง": ["L-01", "L-02", "L-03"],
+        "ห้องประชุมวิศวกรรม": ["L-01", "L-02", "L-03"],
+        "ห้องบัญชี HC": ["L-01", "L-02"],
+        "ห้องบัญชี HS": ["L-01", "L-02"],
+        "ห้องจัดซื้อ": ["L-01", "L-02"],
+        "ห้องบุคคล": ["L-01", "L-02"],
+        "ห้องธุรการ": ["L-01", "L-02"],
+        "ห้องกฎหมาย": ["L-01", "L-02"],
+        "ห้องน้ำชาย ชั้น 1": ["L-01", "L-02"],
+        "ห้องน้ำชาย ชั้น 2": ["L-01", "L-02"],
+        "ห้องน้ำหญิง ชั้น 1": ["L-01", "L-02"],
+        "ห้องน้ำหญิง ชั้น 2": ["L-01", "L-02"]
       },
       "2. อาคารเอนกประสงค์": {
         "โรงอาหาร": ["L-01", "L-02", "L-03"],
@@ -1126,7 +1137,6 @@
       const isHidden = modal.classList.contains('hidden');
       if (isHidden) {
         setupHistoryFilterDropdowns();
-        // รีเซ็ตหน้าต่างประวัติให้กลับไปสถานะรอการกดปุ่มยืนยัน
         document.getElementById('history-list').innerHTML = `
           <div class="text-center text-slate-400 py-12">
             <div class="text-3xl mb-2">💡</div>
